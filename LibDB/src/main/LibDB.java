@@ -163,9 +163,8 @@ public class LibDB implements ActionListener {
 			// if the username and password are valid, 
 			// remove the login window and display a text menu 
 			mainFrame.dispose();
-			mainWindow = new MainFrame();
-			mainWindow.loadMainFrame();
-			//showMenu();     
+			mainWindow = new MainFrame(con);
+			mainWindow.loadMainFrame();    
 		}
 		else{
 			loginAttempts++;
@@ -179,69 +178,6 @@ public class LibDB implements ActionListener {
 				passwordField.setText("");
 			}
 		}             
-	}
-
-	private void showMenu()
-	{
-		int choice;
-		boolean quit;
-		quit = false;
-		try 
-		{
-			// disable auto commit mode
-			con.setAutoCommit(false);
-			while (!quit)
-			{
-				System.out.print("\n\nPlease choose one of the following: \n");
-				System.out.print("1.  Insert book\n");
-				System.out.print("2.  Delete branch\n");
-				System.out.print("3.  Update branch\n");
-				System.out.print("4.  Show branch\n");
-				System.out.print("5.  Quit\n");
-				System.out.print("6.  Create book table\n");
-				System.out.print("7.  Drop book table\n");
-
-				choice = Integer.parseInt(in.readLine());
-
-				System.out.println(" ");
-
-				switch(choice)
-				{
-				case 1:  
-					Librarian librarian = new Librarian(con, in);
-					librarian.addBook(); break;
-				//case 2:  deleteBranch(); break;
-				//case 3:  updateBranch(); break;
-				case 4:  showBranch(); break;
-				case 5:  quit = true;
-				case 6:  createBranch(); break;
-				case 7:  dropBranch(); break;
-				}
-			}
-
-			con.close();
-			in.close();
-			System.out.println("\nGood Bye!\n\n");
-			System.exit(0);
-		}
-		catch (IOException e)
-		{
-			System.out.println("IOException!");
-
-			try
-			{
-				con.close();
-				System.exit(-1);
-			}
-			catch (SQLException ex)
-			{
-				System.out.println("Message: " + ex.getMessage());
-			}
-		}
-		catch (SQLException ex)
-		{
-			System.out.println("Message: " + ex.getMessage());
-		}
 	}
 
 	/*

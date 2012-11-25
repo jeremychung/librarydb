@@ -2,7 +2,7 @@ package main;
 
 import java.util.Date;
 
-public abstract class Borrower {
+public class Borrower {
 
 	private int bid;
 	private String password;

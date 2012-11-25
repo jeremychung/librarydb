@@ -6,14 +6,19 @@ import java.awt.GridLayout;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.Connection;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
+
+import main.Book;
+import main.Librarian;
 
 
 public class LibrarianPanel {
@@ -25,8 +30,11 @@ public class LibrarianPanel {
 	private JTextField publisherField;
 	private JTextField yearField;
 	private JPanel mainPanel;
+	private Connection con;
+	private Librarian librarian;
 
-	public LibrarianPanel(){
+	public LibrarianPanel(Connection con){
+		this.con = con;
 
 	}
 	private void openAddBookForm(){
@@ -92,6 +100,69 @@ public class LibrarianPanel {
 		addButton.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e)
 			{
+				String callNo = callNumberField.getText();
+				if (callNo.equals("")) {
+					JOptionPane.showMessageDialog(null,
+							"Please fill in Call Number.",
+							"Error",
+							JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+
+				int isbn = 0;
+				try{
+					isbn = Integer.parseInt(isbnField.getText());
+				}
+				catch(NumberFormatException numExcept){
+					JOptionPane.showMessageDialog(null,
+							"Invalid ISBN.",
+							"Error",
+							JOptionPane.ERROR_MESSAGE);
+					return;
+				};
+
+				String title = titleField.getText();
+				if (title.equals("")) {
+					JOptionPane.showMessageDialog(null,
+							"Please fill in book title.",
+							"Error",
+							JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+
+				String mainAuthor = mainAuthorField.getText();
+				if (mainAuthor.equals("")) {
+					JOptionPane.showMessageDialog(null,
+							"Please fill in main author.",
+							"Error",
+							JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+
+				String publisher = publisherField.getText();
+				if (publisher.equals("")) {
+					JOptionPane.showMessageDialog(null,
+							"Please fill in publisher.",
+							"Error",
+							JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+
+				int year = 0;
+				try{
+					year = Integer.parseInt(yearField.getText());
+				}
+				catch(NumberFormatException numExcept){
+					JOptionPane.showMessageDialog(null,
+							"Invalid year.",
+							"Error",
+							JOptionPane.ERROR_MESSAGE);
+					return;
+				};
+				Book book = new Book(callNo, isbn, title, mainAuthor, publisher, year);
+				librarian = new Librarian(con);
+				librarian.addBook(book);
+				frame.setVisible(false);
 			}
 		});
 
@@ -103,7 +174,6 @@ public class LibrarianPanel {
 		});
 
 	}
-
 
 	public JComponent getLibrarianPanel(){
 

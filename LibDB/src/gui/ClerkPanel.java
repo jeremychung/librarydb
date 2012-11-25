@@ -11,17 +11,27 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.sql.Connection;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
+
+import main.Book;
+import main.Borrower;
+import main.Clerk;
+import main.Librarian;
 
 
 public class ClerkPanel {
@@ -33,11 +43,14 @@ public class ClerkPanel {
 	private JTextField phoneField;
 	private JTextField emailField;
 	private JTextField sinOrStNoField;
-	private JTextField expiryDateField;
-	private JTextField typeField;
+	private JFormattedTextField expiryDateField;
+	private JComboBox typeComboBox;
 	private JPanel mainPanel;
+	private Connection con;
+	private Clerk clerk;
 
-	public ClerkPanel(){
+	public ClerkPanel(Connection con){
+		this.con = con;
 	}
 
 	private void openAddBorrowerForm(){
@@ -55,7 +68,7 @@ public class ClerkPanel {
 		JLabel phoneLabel = new JLabel("Phone: ");
 		JLabel emailLabel = new JLabel("Email Address: ");
 		JLabel sinOrStNoLabel = new JLabel("SIN/Student #: ");
-		JLabel expiryDateLabel = new JLabel("Expiry Date: ");
+		JLabel expiryDateLabel = new JLabel("Expiry Date(dd/mm/yyyy): ");
 		JLabel typeLabel = new JLabel("Type: ");
 
 		// Fields
@@ -66,9 +79,12 @@ public class ClerkPanel {
 		phoneField = new JTextField(10);
 		emailField = new JTextField(10);
 		sinOrStNoField = new JTextField(10);
-		expiryDateField = new JTextField(10);
-		typeField = new JTextField(10);
-
+		expiryDateField = new JFormattedTextField(new SimpleDateFormat("dd/MM/yyyy"));
+		
+		//typeField = new JTextField(10);
+		String[] types = {"", "Student", "Faculty", "Staff"};
+		typeComboBox = new JComboBox(types);
+		
 		// Buttons
 		JButton addButton = new JButton("Add");
 		JButton cancelButton = new JButton("Cancel");
@@ -91,7 +107,7 @@ public class ClerkPanel {
 		addBorrowerForm.add(expiryDateLabel);
 		addBorrowerForm.add(expiryDateField);
 		addBorrowerForm.add(typeLabel);
-		addBorrowerForm.add(typeField);
+		addBorrowerForm.add(typeComboBox);
 
 		addBorrowerForm.add(addButton);
 		addBorrowerForm.add(cancelButton);
@@ -114,6 +130,101 @@ public class ClerkPanel {
 		addButton.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e)
 			{
+				int bid = 0;
+				try{
+					bid = Integer.parseInt(bidField.getText());
+				}
+				catch(NumberFormatException numExcept){
+					JOptionPane.showMessageDialog(null,
+							"Invalid BID.",
+							"Error",
+							JOptionPane.ERROR_MESSAGE);
+					return;
+				};
+				
+				String password = passwordField.getText();
+				if (password.equals("")) {
+					JOptionPane.showMessageDialog(null,
+							"Please fill in a password.",
+							"Error",
+							JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+				
+				String name = nameField.getText();
+				if (name.equals("")) {
+					JOptionPane.showMessageDialog(null,
+							"Please fill in a name.",
+							"Error",
+							JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+				
+				String address = addressField.getText();
+				if (address.equals("")) {
+					JOptionPane.showMessageDialog(null,
+							"Please fill in an address.",
+							"Error",
+							JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+
+
+				int phone = 0;
+				try{
+					phone = Integer.parseInt(phoneField.getText());
+				}
+				catch(NumberFormatException numExcept){
+					JOptionPane.showMessageDialog(null,
+							"Invalid phone number.",
+							"Error",
+							JOptionPane.ERROR_MESSAGE);
+					return;
+				};
+
+				String email = emailField.getText();
+				if (email.equals("")) {
+					JOptionPane.showMessageDialog(null,
+							"Please fill in an email address.",
+							"Error",
+							JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+				
+				int sinOrStNo = 0;
+				try{
+					sinOrStNo = Integer.parseInt(sinOrStNoField.getText());
+				}
+				catch(NumberFormatException numExcept){
+					JOptionPane.showMessageDialog(null,
+							"Invalid SIN/Student number.",
+							"Error",
+							JOptionPane.ERROR_MESSAGE);
+					return;
+				};
+
+				Date expiryDate = (Date) expiryDateField.getValue();
+				if (expiryDate.equals(null)) {
+					JOptionPane.showMessageDialog(null,
+							"Please fill in an expiry date.",
+							"Error",
+							JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+
+				String type = (String)typeComboBox.getSelectedItem();
+				if (type.equals("")) {
+					JOptionPane.showMessageDialog(null,
+							"Please select borrower type.",
+							"Error",
+							JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+
+				Borrower borrower = new Borrower(bid, password, name, address, phone, email, sinOrStNo, expiryDate, type);
+				clerk = new Clerk(con);
+				clerk.addBorrower(borrower);
+				frame.setVisible(false);
 			}
 		});
 
@@ -135,7 +246,6 @@ public class ClerkPanel {
 		JButton checkoutButton = new JButton("Checkout");
 		JButton processReturnButton = new JButton("Process Return");
 		JButton checkOverdueButton = new JButton("Check Overdue");
-
 
 		addBorrowerButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e)
@@ -169,7 +279,6 @@ public class ClerkPanel {
 		mainPanel.add(checkoutButton);
 		mainPanel.add(processReturnButton);
 		mainPanel.add(checkOverdueButton);
-
 
 		return mainPanel;
 

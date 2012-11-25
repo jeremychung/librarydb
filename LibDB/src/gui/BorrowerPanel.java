@@ -41,7 +41,6 @@ public class BorrowerPanel {
 		searchForm.setLayout(new GridLayout(0, 2, 10, 10));
 		searchForm.setBorder(new EmptyBorder(10, 10, 10, 10) );
 
-		
 		// Field Labels
 		JLabel searchLabel = new JLabel("Search: ");
 		// Fields

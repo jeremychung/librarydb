@@ -10,21 +10,25 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Rectangle;
+import java.sql.Connection;
 
 
 public class MainFrame extends JPanel {
-	public MainFrame() {
+	private Connection con;
+	
+	public MainFrame(Connection con) {
 		super(new GridLayout(1, 1));
 
 		JTabbedPane tabbedPane = new JTabbedPane();
-
+		this.con = con;
+		
 		BorrowerPanel borrower = new BorrowerPanel();
 		tabbedPane.addTab("Borrower", borrower.getBorrowerPanel());
 
-		ClerkPanel clerk = new ClerkPanel();
+		ClerkPanel clerk = new ClerkPanel(con);
 		tabbedPane.addTab("Clerk", clerk.getClerkPanel());
 
-		LibrarianPanel librarian = new LibrarianPanel();
+		LibrarianPanel librarian = new LibrarianPanel(con);
 		tabbedPane.addTab("Librarian", librarian.getLibrarianPanel());
 
 		//Add the tabbed pane to this panel.
@@ -51,11 +55,12 @@ public class MainFrame extends JPanel {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		//Add content to the window.
-		frame.add(new MainFrame(), BorderLayout.CENTER);
+		frame.add(new MainFrame(con), BorderLayout.CENTER);
 
 		//Display the window.
 		frame.pack();
 		frame.setVisible(true);
+		frame.setResizable(false);
 
 		// center the frame
 		Dimension d = frame.getToolkit().getScreenSize();

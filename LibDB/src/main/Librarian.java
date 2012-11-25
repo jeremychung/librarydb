@@ -1,73 +1,50 @@
 package main;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import javax.swing.JOptionPane;
+
 public class Librarian {
 	private Connection con;
-	private BufferedReader in;
-	
-	public Librarian(Connection con, BufferedReader in){
+
+	public Librarian(Connection con){
 		this.con = con;
-		this.in = in;
 	}
 	
-	
-	public void addBook(){
+	public void addBook(Book book){
 		
-		String callNumber;
-		int isbn;
-		String title;
-		String mainAuthor;
-		String publisher;
-		int year;
+		String callNumber = book.getCallNumber();
+		int isbn = book.getIsbn();
+		String title = book.getTitle();
+		String mainAuthor = book.getMainAuthor();
+		String publisher = book.getPublisher();
+		int year = book.getYear();
 
 		PreparedStatement  ps;
 
 		try{
 			ps = con.prepareStatement("INSERT INTO book VALUES (?,?,?,?,?,?)");
 
-			System.out.print("\nCall Number: ");
-			callNumber = in.readLine();
 			ps.setString(1, callNumber);
-
-			System.out.print("\nISBN: ");
-			isbn = Integer.parseInt(in.readLine());
 			ps.setInt(2, isbn);
-
-			System.out.print("\nTitle: ");
-			title = in.readLine();
 			ps.setString(3, title);
-			
-			System.out.print("\nMain Author: ");
-			mainAuthor = in.readLine();
 			ps.setString(4, mainAuthor);
-			
-			System.out.print("\nPublisher: ");
-			publisher = in.readLine();
 			ps.setString(5, publisher);
-			
-			System.out.print("\nYear: ");
-			year = Integer.parseInt(in.readLine());
 			ps.setInt(6, year);
-			
-			ps.executeUpdate();
 
+			ps.executeUpdate();
 			// commit work 
 			con.commit();
-
 			ps.close();
-		}
-		catch (IOException e)
-		{
-			System.out.println("IOException!");
 		}
 		catch (SQLException ex)
 		{
-			System.out.println("Message: " + ex.getMessage());
+			JOptionPane.showMessageDialog(null,
+					"Message: " + ex.getMessage(),
+					"Error",
+					JOptionPane.ERROR_MESSAGE);
 			try 
 			{
 				// undo the insert
@@ -75,8 +52,10 @@ public class Librarian {
 			}
 			catch (SQLException ex2)
 			{
-				System.out.println("Message: " + ex2.getMessage());
-				System.exit(-1);
+				JOptionPane.showMessageDialog(null,
+						"Message: " + ex2.getMessage(),
+						"Error",
+						JOptionPane.ERROR_MESSAGE);
 			}
 		}
 	}
