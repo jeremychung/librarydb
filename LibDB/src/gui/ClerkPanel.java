@@ -2,20 +2,13 @@ package gui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.GridLayout;
-import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.sql.Connection;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
@@ -24,15 +17,11 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
-import main.Book;
 import main.Borrower;
 import main.Clerk;
-import main.Librarian;
-
 
 public class ClerkPanel {
 
@@ -46,11 +35,9 @@ public class ClerkPanel {
 	private JFormattedTextField expiryDateField;
 	private JComboBox typeComboBox;
 	private JPanel mainPanel;
-	private Connection con;
 	private Clerk clerk;
 
-	public ClerkPanel(Connection con){
-		this.con = con;
+	public ClerkPanel(){
 	}
 
 	private void openAddBorrowerForm(){
@@ -222,7 +209,7 @@ public class ClerkPanel {
 				}
 
 				Borrower borrower = new Borrower(bid, password, name, address, phone, email, sinOrStNo, expiryDate, type);
-				clerk = new Clerk(con);
+				clerk = new Clerk();
 				clerk.addBorrower(borrower);
 				frame.setVisible(false);
 			}

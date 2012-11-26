@@ -9,8 +9,8 @@ import javax.swing.JOptionPane;
 public class Librarian {
 	private Connection con;
 
-	public Librarian(Connection con){
-		this.con = con;
+	public Librarian(){
+		this.con = LibDB.con;
 	}
 	
 	public void addBook(Book book){

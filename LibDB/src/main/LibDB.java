@@ -12,7 +12,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -34,7 +33,7 @@ public class LibDB implements ActionListener {
 	// command line reader 
 	private BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
-	private Connection con;
+	public static Connection con;
 
 	// user is allowed 3 login attempts
 	private int loginAttempts = 0;
@@ -163,7 +162,7 @@ public class LibDB implements ActionListener {
 			// if the username and password are valid, 
 			// remove the login window and display a text menu 
 			mainFrame.dispose();
-			mainWindow = new MainFrame(con);
+			mainWindow = new MainFrame();
 			mainWindow.loadMainFrame();    
 		}
 		else{

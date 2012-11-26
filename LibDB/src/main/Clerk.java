@@ -10,8 +10,8 @@ import javax.swing.JOptionPane;
 public class Clerk {
 	private Connection con;
 
-	public Clerk(Connection con){
-		this.con = con;
+	public Clerk(){
+		this.con = LibDB.con;
 	}
 
 	public void addBorrower(Borrower borrower){

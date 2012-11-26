@@ -6,7 +6,6 @@ import java.awt.GridLayout;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.sql.Connection;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -20,7 +19,6 @@ import javax.swing.border.EmptyBorder;
 import main.Book;
 import main.Librarian;
 
-
 public class LibrarianPanel {
 
 	private JTextField callNumberField;
@@ -30,12 +28,9 @@ public class LibrarianPanel {
 	private JTextField publisherField;
 	private JTextField yearField;
 	private JPanel mainPanel;
-	private Connection con;
 	private Librarian librarian;
 
-	public LibrarianPanel(Connection con){
-		this.con = con;
-
+	public LibrarianPanel(){
 	}
 	private void openAddBookForm(){
 		// Add Book Form
@@ -160,7 +155,7 @@ public class LibrarianPanel {
 					return;
 				};
 				Book book = new Book(callNo, isbn, title, mainAuthor, publisher, year);
-				librarian = new Librarian(con);
+				librarian = new Librarian();
 				librarian.addBook(book);
 				frame.setVisible(false);
 			}
@@ -172,7 +167,6 @@ public class LibrarianPanel {
 				frame.setVisible(false);
 			}
 		});
-
 	}
 
 	public JComponent getLibrarianPanel(){
