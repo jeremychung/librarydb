@@ -7,14 +7,14 @@ import javax.swing.JOptionPane;
 
 public class Librarian {
 	
-	public static void addBook(int isbn, String title, String mainAuthor, String publisher, int year){
+	public static void addBook(String callNumber, int isbn, String title, String mainAuthor, String publisher, int year){
 
 		PreparedStatement  ps;
 
 		try{
-			ps = LibDB.con.prepareStatement("INSERT INTO book VALUES (callNumber_counter.nextval,?,?,?,?,?)");
+			ps = LibDB.con.prepareStatement("INSERT INTO book VALUES (?,?,?,?,?,?)");
 
-			//ps.setString(1, callNumber);
+			ps.setString(1, callNumber);
 			ps.setInt(2, isbn);
 			ps.setString(3, title);
 			ps.setString(4, mainAuthor);

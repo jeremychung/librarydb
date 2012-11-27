@@ -36,6 +36,7 @@ public class LibrarianPanel {
 		addBookForm.setBorder(new EmptyBorder(10, 10, 10, 10) );
 
 		// Field Labels
+		JLabel callNumberLabel = new JLabel("Call Number: ");
 		JLabel isbnLabel = new JLabel("ISBN: ");
 		JLabel titleLabel = new JLabel("Title: ");
 		JLabel mainAuthorLabel = new JLabel("Main Author: ");
@@ -43,10 +44,11 @@ public class LibrarianPanel {
 		JLabel yearLabel = new JLabel("Year: ");
 
 		// Fields
-		isbnField = new JTextField(10);
-		titleField = new JTextField(10);
-		mainAuthorField = new JTextField(10);
-		publisherField = new JTextField(10);
+		callNumberField = new JTextField(20);
+		isbnField = new JTextField(20);
+		titleField = new JTextField(20);
+		mainAuthorField = new JTextField(20);
+		publisherField = new JTextField(20);
 		yearField = new JTextField(10);
 
 		// Buttons
@@ -54,6 +56,8 @@ public class LibrarianPanel {
 		JButton cancelButton = new JButton("Cancel");
 
 		// Add components to panel
+		addBookForm.add(callNumberLabel);
+		addBookForm.add(callNumberField);
 		addBookForm.add(isbnLabel);
 		addBookForm.add(isbnField);
 		addBookForm.add(titleLabel);
@@ -87,6 +91,15 @@ public class LibrarianPanel {
 		addButton.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e)
 			{
+				String callNumber = callNumberField.getText();
+				if (callNumber.equals("")) {
+					JOptionPane.showMessageDialog(null,
+							"Please fill in the call number.",
+							"Error",
+							JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+				
 				int isbn = 0;
 				try{
 					isbn = Integer.parseInt(isbnField.getText());
@@ -137,7 +150,7 @@ public class LibrarianPanel {
 							JOptionPane.ERROR_MESSAGE);
 					return;
 				};
-				Librarian.addBook(isbn, title, mainAuthor, publisher, year);
+				Librarian.addBook(callNumber, isbn, title, mainAuthor, publisher, year);
 				frame.setVisible(false);
 			}
 		});
