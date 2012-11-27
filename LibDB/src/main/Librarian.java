@@ -1,5 +1,7 @@
 package main;
 
+import gui.LibrarianPanel;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -10,23 +12,23 @@ import java.util.Date;
 import javax.swing.JOptionPane;
 
 public class Librarian {
-	
+
 	public static void addNewBook(int callNumber, int isbn, String title, String mainAuthor, String publisher, int year){
-		
+
 		PreparedStatement checkPs;
 		PreparedStatement insertNewPs;
 		PreparedStatement copyPs;
 		PreparedStatement ps;
-		
+
 		ResultSet checkRs;
 		ResultSet copyRs;
-		
+
 		try{
 			checkPs = LibDB.con.prepareStatement("SELECT callNumber FROM Book WHERE Book.callNumber = ?");
 			checkPs.setInt(1, callNumber);
-			
+
 			checkRs = checkPs.executeQuery();
-			
+
 			if ( !checkRs.next() ){
 				insertNewPs = LibDB.con.prepareStatement("INSERT INTO Book VALUES (?,?,?,?,?,?)");
 
@@ -42,30 +44,30 @@ public class Librarian {
 				insertNewPs.close();
 			}
 			checkRs.close();
-			
+
 			int maxCopyNo = 0;
-			
+
 			copyPs = LibDB.con.prepareStatement("SELECT MAX(copyNo) FROM BookCopy WHERE BookCopy.callNumber = ?");
 			copyPs.setInt(1, callNumber);
-			
+
 			copyRs = copyPs.executeQuery();
-			
+
 			if ( copyRs.next()) {
 				maxCopyNo = copyRs.getInt("copyNo");
 			}
 			copyRs.close();
-			
+
 			maxCopyNo = maxCopyNo++;
-				
+
 			ps = LibDB.con.prepareStatement("INSERT INTO BookCopy VALUES (?,?,?)");
 			ps.setInt(1, callNumber);
 			ps.setInt(2, maxCopyNo);
 			ps.setString(3, "in");
-			
+
 			ps.executeUpdate();
 			LibDB.con.commit();
 			ps.close();
-				
+
 		} catch (SQLException ex) {
 			JOptionPane.showMessageDialog(null,
 					"Message: " + ex.getMessage(),
@@ -81,67 +83,63 @@ public class Librarian {
 			}
 		}
 	}
+	
+	public static void checkedOutItems(String subjects){
+		String[] subjs = subjects.split(";");
+		for(String subject : subjs){
+			checkedOutItem(subject.trim());
+		}
+	}
+	
 	//Assume: inDate means dueDate
 	//Assume: Empty Strings can be passed in as input if no subject
-	
-	public void checkedOutItems(String subject){
-		String callNumber;
+
+	public static void checkedOutItem(String subject){
+		int callNumber;
 		int copyNo;
 		Date inDate;
 		Date outDate;
-		
+		boolean dueFlag = false;
+
 		PreparedStatement ps;
 		ResultSet rs;
 
 		try{
 			if (subject.equals("")){
 				ps = LibDB.con.prepareStatement("SELECT BookCopy.callNumber, BookCopy.copyNo, Borrowing.outDate, Borrowing.inDate" +
-												"FROM BookCopy" +
-												"LEFT JOIN Borrowing" +
-												"ON BookCopy.callNumber=Borrowing.callNumber AND BookCopy.copyNo=Borrowing.copyNO" +
-												"WHERE BookCopy.status = 'out'" +
-												"ORDER BY BookCopy.callNumber");
+						"FROM BookCopy" +
+						"LEFT JOIN Borrowing" +
+						"ON BookCopy.callNumber=Borrowing.callNumber AND BookCopy.copyNo=Borrowing.copyNO" +
+						"WHERE BookCopy.status = 'out'" +
+						"ORDER BY BookCopy.callNumber");
 			}else{
 				ps = LibDB.con.prepareStatement("SELECT BookCopy.callNumber, BookCopy.copyNo, Borrowing.outDate, Borrowing.inDate" +
-												"FROM BookCopy" +
-												"LEFT JOIN Borrowing" +
-												"ON BookCopy.callNumber=Borrowing.callNumber AND BookCopy.copyNo=Borrowing.copyNO" +
-												"LEFT JOIN HasSubject" +
-												"ON BookCopy.callNumber=HasSubject.callNumber" +
-												"WHERE BookCopy.status = 'out' AND HasSubject.subject = ?" +
-												"ORDER BY BookCopy.callNumber");
+						"FROM BookCopy" +
+						"LEFT JOIN Borrowing" +
+						"ON BookCopy.callNumber=Borrowing.callNumber AND BookCopy.copyNo=Borrowing.copyNO" +
+						"LEFT JOIN HasSubject" +
+						"ON BookCopy.callNumber=HasSubject.callNumber" +
+						"WHERE BookCopy.status = 'out' AND HasSubject.subject = ?" +
+						"ORDER BY BookCopy.callNumber");
 				ps.setString(1, subject);
 			}
-			
+
 			rs = ps.executeQuery();
-			ResultSetMetaData rsmd = rs.getMetaData();
-
-			int numCols = rsmd.getColumnCount();
-
-			System.out.println(" ");
-
-			for (int i = 0; i < numCols; i++) {
-				System.out.printf("%-15s", rsmd.getColumnName(i+1));    
-			}
-
-			System.out.println(" ");
 
 			while(rs.next()) {
-				callNumber = rs.getString("callNumber");
-				System.out.printf("%-16s", callNumber);
-				
+				callNumber = rs.getInt("callNumber");
+
 				copyNo = rs.getInt("copyNo");
-				System.out.printf("%-5s", copyNo);
-				
+
 				outDate = rs.getDate("outDate");
-				System.out.printf("%-10s", outDate);
-				
+
 				Date d = new Date();
 				inDate = rs.getDate("inDate");
-				System.out.printf("%-10s", inDate);
+
 				if ( (outDate.compareTo(d)) < 0  ) {
-					System.out.printf(" OVERDUE! ");
+					dueFlag = true;
 				}
+				LibrarianPanel.outModel.insertRow(LibrarianPanel.viewOutTable.getRowCount(),new Object[]{callNumber, copyNo, outDate, inDate, new Boolean(dueFlag)});
 			}
 			rs.close();
 		}catch(SQLException ex){
@@ -151,11 +149,11 @@ public class Librarian {
 					JOptionPane.ERROR_MESSAGE);
 		}
 	}
-		
-//Need to find out how to flag things
 
-	public void popularItems(int year, int n){
-		String callNumber;
+	//Need to find out how to flag things
+
+	public static void popularItems(int year, int n){
+		int callNumber;
 		int    isbn;
 		String title;
 		String mainAuthor;
@@ -167,52 +165,36 @@ public class Librarian {
 
 		try{
 			ps = LibDB.con.prepareStatement("SELECT * " +
-											"FROM Book " +
-											"WHERE callNumber IN (SELECT TOP ? callNumber, COUNT(*) " +
-											"FROM Borrowing " +
-											"WHERE YEAR = ? " +
-											"GROUP BY callNumber " +
-											"ORDER BY COUNT(*) DESC)");
+					"FROM Book " +
+					"WHERE callNumber IN (SELECT TOP ? callNumber, COUNT(*) " +
+					"FROM Borrowing " +
+					"WHERE YEAR = ? " +
+					"GROUP BY callNumber " +
+					"ORDER BY COUNT(*) DESC)");
 
 			ps.setInt(1, n);
 			ps.setInt(2, year);
 
 			rs = ps.executeQuery();
 
-			ResultSetMetaData rsmd = rs.getMetaData();
-
-			int numCols = rsmd.getColumnCount();
-
-			System.out.println(" ");
-
-			for (int i = 0; i < numCols; i++) {
-				System.out.printf("%-15s", rsmd.getColumnName(i+1));    
-			}
-
-			System.out.println(" ");
-
 			while(rs.next()) {
-				callNumber = rs.getString("callNumber");
-				System.out.printf("%-16s", callNumber);
+				callNumber = rs.getInt("callNumber");
 
 				isbn = rs.getInt("isbn");
-				System.out.printf("%-20s", isbn);
 
 				title = rs.getString("title");
-				System.out.printf("%-20s", title);
 
 				mainAuthor = rs.getString("mainAuthor");
-				System.out.printf("%-20s", mainAuthor);
 
 				publisher = rs.getString("publisher");
-				System.out.printf("%-20s", publisher);
 
 				bookyear = rs.getInt("year");
-				System.out.printf("%-20s", bookyear);
+
+				LibrarianPanel.popModel.insertRow(LibrarianPanel.viewPopTable.getRowCount(),new Object[]{callNumber, isbn, title, mainAuthor, publisher, bookyear});
 			}
-			
+
 			rs.close();
-			
+
 		}catch(SQLException ex){
 			JOptionPane.showMessageDialog(null,
 					"Message: " + ex.getMessage(),

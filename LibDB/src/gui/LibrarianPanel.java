@@ -7,6 +7,7 @@ import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Date;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -32,6 +33,12 @@ public class LibrarianPanel {
 	private JTextField publisherField;
 	private JTextField yearField;
 	private JPanel mainPanel;
+	
+	public static JTable viewPopTable;
+	public static DefaultTableModel popModel;
+	
+	public static JTable viewOutTable;
+	public static DefaultTableModel outModel;
 
 	private void openAddBookForm(){
 		// Add Book Form
@@ -175,30 +182,24 @@ public class LibrarianPanel {
 		// Add check overdue Form
 		JPanel viewOutForm = new JPanel();
 		
-		final String[] columnNames = {"Call Number", "Copy #", "Title", "Out Date", "Due Date", "Out"};
+		final String[] columnNames = {"Call Number", "Copy #", "Out Date", "Due Date", "Out"};
 		Object[][] data = {};
 
-		final DefaultTableModel model = new DefaultTableModel(data,columnNames);
+		outModel = new DefaultTableModel(data,columnNames);
 
 	
 		// Add table to view items
-		JTable viewOutTable = new JTable(model);
+		viewOutTable = new JTable(outModel);
 		
 		TableColumn tc = viewOutTable.getColumnModel().getColumn(5);  
         tc.setCellEditor(viewOutTable.getDefaultEditor(Boolean.class));  
         tc.setCellRenderer(viewOutTable.getDefaultRenderer(Boolean.class));
 
-		model.insertRow(viewOutTable.getRowCount(),new Object[]{"Call1", "1", "Book1", "date1", "date11", new Boolean(false)});
-		model.insertRow(viewOutTable.getRowCount(),new Object[]{"Call2", "2", "Book2", "date2", "date22", new Boolean(false)});
-		model.insertRow(viewOutTable.getRowCount(),new Object[]{"Call3", "3", "Book3", "date3", "date33", new Boolean(false)});
-		model.insertRow(viewOutTable.getRowCount(),new Object[]{"Call4", "4", "Book4", "date4", "date44", new Boolean(false)});
-		
-		
 		// Add table to view items
 		JScrollPane scrollPane = new JScrollPane(viewOutTable);
 		
 		JLabel subjectsLabel = new JLabel("Subjects: ");
-		JTextField subjectsField = new JTextField(25);
+		final JTextField subjectsField = new JTextField(25);
 		JButton searchButton = new JButton("Search");
 		JPanel subjectsPanel = new JPanel();
 		
@@ -238,31 +239,39 @@ public class LibrarianPanel {
 		frame.setLocation( (d.width - r.width)/2, (d.height - r.height)/2 );
 
 		// Button Listeners
+		searchButton.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e)
+			{			
+				String subjects = subjectsField.getText();
+				Librarian.checkedOutItems(subjects);
+			}
+		});
+		
 		sendSeleButton.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e)
 			{			
-				ArrayList<String> bids = new ArrayList<String>();
-				for(int x=0; x<model.getRowCount(); x++){
-					if(model.getValueAt(x, 5).equals(true)){
-						bids.add((String) model.getValueAt(x, 3));
-					}
-				}
-				for(String bid : bids){
-					System.out.println(bid);
-				}
+//				ArrayList<String> bids = new ArrayList<String>();
+//				for(int x=0; x<model.getRowCount(); x++){
+//					if(model.getValueAt(x, 5).equals(true)){
+//						bids.add((String) model.getValueAt(x, 3));
+//					}
+//				}
+//				for(String bid : bids){
+//					System.out.println(bid);
+//				}
 			}
 		});
 		
 		sendAllButton.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e)
 			{			
-				ArrayList<String> bids = new ArrayList<String>();
-				for(int x=0; x<model.getRowCount(); x++){
-						bids.add((String) model.getValueAt(x, 3));
-				}
-				for(String bid : bids){
-					System.out.println(bid);
-				}
+//				ArrayList<String> bids = new ArrayList<String>();
+//				for(int x=0; x<model.getRowCount(); x++){
+//						bids.add((String) model.getValueAt(x, 3));
+//				}
+//				for(String bid : bids){
+//					System.out.println(bid);
+//				}
 			}
 		});
 
@@ -277,33 +286,28 @@ public class LibrarianPanel {
 	private void openViewPopForm(){
 		// Add check overdue Form
 		JPanel viewPopForm = new JPanel();
-		
-		final String[] columnNames = {"Call Number", "Copy #", "Title", "Out Date", "Due Date", "Out"};
+
+		final String[] columnNames = {"Call Number", "ISBN", "Title", "Main Author", "Publisher", "Year"};
 		Object[][] data = {};
 
-		final DefaultTableModel model = new DefaultTableModel(data,columnNames);
+		popModel = new DefaultTableModel(data,columnNames);
 
-	
 		// Add table to view items
-		JTable viewPopTable = new JTable(model);
-		
-		TableColumn tc = viewPopTable.getColumnModel().getColumn(5);  
-        tc.setCellEditor(viewPopTable.getDefaultEditor(Boolean.class));  
-        tc.setCellRenderer(viewPopTable.getDefaultRenderer(Boolean.class));
+		viewPopTable = new JTable(popModel);
 
-		model.insertRow(viewPopTable.getRowCount(),new Object[]{"Call1", "1", "Book1", "date1", "date11", new Boolean(false)});
-		model.insertRow(viewPopTable.getRowCount(),new Object[]{"Call2", "2", "Book2", "date2", "date22", new Boolean(false)});
-		model.insertRow(viewPopTable.getRowCount(),new Object[]{"Call3", "3", "Book3", "date3", "date33", new Boolean(false)});
-		model.insertRow(viewPopTable.getRowCount(),new Object[]{"Call4", "4", "Book4", "date4", "date44", new Boolean(false)});
+		//model.insertRow(viewPopTable.getRowCount(),new Object[]{callNumber, isbn, title, mainAuthor, publisher, year});
+//		popModel.insertRow(viewPopTable.getRowCount(),new Object[]{"Call2", "2", "Book2", "date2", "date22", new Boolean(false)});
+//		popModel.insertRow(viewPopTable.getRowCount(),new Object[]{"Call3", "3", "Book3", "date3", "date33", new Boolean(false)});
+//		popModel.insertRow(viewPopTable.getRowCount(),new Object[]{"Call4", "4", "Book4", "date4", "date44", new Boolean(false)});
 		
 		
 		// Add table to view items
 		JScrollPane scrollPane = new JScrollPane(viewPopTable);
 		
 		JLabel topLabel = new JLabel("Top: ");
-		JTextField topField = new JTextField(10);
+		final JTextField topField = new JTextField(10);
 		JLabel yearLabel = new JLabel("of year: ");
-		JTextField yearField = new JTextField(10);
+		final JTextField yearField = new JTextField(10);
 		JPanel topPanel = new JPanel();
 		
 		topPanel.add(topLabel);
@@ -344,15 +348,31 @@ public class LibrarianPanel {
 		showButton.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e)
 			{			
-				ArrayList<String> bids = new ArrayList<String>();
-				for(int x=0; x<model.getRowCount(); x++){
-					if(model.getValueAt(x, 5).equals(true)){
-						bids.add((String) model.getValueAt(x, 3));
-					}
+				int top = 0;
+				try{
+					top = Integer.parseInt(topField.getText());
 				}
-				for(String bid : bids){
-					System.out.println(bid);
+				catch(NumberFormatException numExcept){
+					JOptionPane.showMessageDialog(null,
+							"Invalid top number.",
+							"Error",
+							JOptionPane.ERROR_MESSAGE);
+					return;
+				};
+				
+				int year = 0;
+				try{
+					year = Integer.parseInt(yearField.getText());
 				}
+				catch(NumberFormatException numExcept){
+					JOptionPane.showMessageDialog(null,
+							"Invalid year.",
+							"Error",
+							JOptionPane.ERROR_MESSAGE);
+					return;
+				};
+				
+				Librarian.popularItems(top, year);
 			}
 		});
 
