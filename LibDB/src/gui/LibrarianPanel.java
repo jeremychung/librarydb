@@ -6,6 +6,7 @@ import java.awt.GridLayout;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -13,8 +14,12 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumn;
 
 import main.Librarian;
 
@@ -91,14 +96,17 @@ public class LibrarianPanel {
 		addButton.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e)
 			{
-				String callNumber = callNumberField.getText();
-				if (callNumber.equals("")) {
+				int callNumber = 0;
+				try{
+					callNumber = Integer.parseInt(callNumberField.getText());
+				}
+				catch(NumberFormatException numExcept){
 					JOptionPane.showMessageDialog(null,
-							"Please fill in the call number.",
+							"Invalid Call Number.",
 							"Error",
 							JOptionPane.ERROR_MESSAGE);
 					return;
-				}
+				};
 				
 				int isbn = 0;
 				try{
@@ -150,7 +158,7 @@ public class LibrarianPanel {
 							JOptionPane.ERROR_MESSAGE);
 					return;
 				};
-				Librarian.addBook(callNumber, isbn, title, mainAuthor, publisher, year);
+				Librarian.addNewBook(callNumber, isbn, title, mainAuthor, publisher, year);
 				frame.setVisible(false);
 			}
 		});
@@ -162,7 +170,200 @@ public class LibrarianPanel {
 			}
 		});
 	}
+	
+	private void openViewOutForm(){
+		// Add check overdue Form
+		JPanel viewOutForm = new JPanel();
+		
+		final String[] columnNames = {"Call Number", "Copy #", "Title", "Out Date", "Due Date", "Out"};
+		Object[][] data = {};
 
+		final DefaultTableModel model = new DefaultTableModel(data,columnNames);
+
+	
+		// Add table to view items
+		JTable viewOutTable = new JTable(model);
+		
+		TableColumn tc = viewOutTable.getColumnModel().getColumn(5);  
+        tc.setCellEditor(viewOutTable.getDefaultEditor(Boolean.class));  
+        tc.setCellRenderer(viewOutTable.getDefaultRenderer(Boolean.class));
+
+		model.insertRow(viewOutTable.getRowCount(),new Object[]{"Call1", "1", "Book1", "date1", "date11", new Boolean(false)});
+		model.insertRow(viewOutTable.getRowCount(),new Object[]{"Call2", "2", "Book2", "date2", "date22", new Boolean(false)});
+		model.insertRow(viewOutTable.getRowCount(),new Object[]{"Call3", "3", "Book3", "date3", "date33", new Boolean(false)});
+		model.insertRow(viewOutTable.getRowCount(),new Object[]{"Call4", "4", "Book4", "date4", "date44", new Boolean(false)});
+		
+		
+		// Add table to view items
+		JScrollPane scrollPane = new JScrollPane(viewOutTable);
+		
+		JLabel subjectsLabel = new JLabel("Subjects: ");
+		JTextField subjectsField = new JTextField(25);
+		JButton searchButton = new JButton("Search");
+		JPanel subjectsPanel = new JPanel();
+		
+		subjectsPanel.add(subjectsLabel, BorderLayout.LINE_START);
+		subjectsPanel.add(subjectsField, BorderLayout.CENTER);
+		subjectsPanel.add(searchButton, BorderLayout.LINE_END);
+		
+		// Buttons
+		JButton sendSeleButton = new JButton("Send to selected");
+		JButton sendAllButton = new JButton("Send to All");
+		JButton closeButton = new JButton("Close");
+		// Button panel
+		JPanel buttonPanel = new JPanel();
+		buttonPanel.add(sendSeleButton, BorderLayout.LINE_START);
+		buttonPanel.add(sendAllButton, BorderLayout.CENTER);
+		buttonPanel.add(closeButton, BorderLayout.LINE_END);
+		
+
+		// Add components to panel
+		scrollPane.setPreferredSize(new Dimension(480, 200));
+		viewOutForm.add(scrollPane, BorderLayout.PAGE_START);
+		viewOutForm.add(subjectsPanel, BorderLayout.CENTER);
+		viewOutForm.add(buttonPanel, BorderLayout.PAGE_END);
+
+		// Window
+		final JFrame frame = new JFrame("View Out Items");
+		// Window Properties
+		frame.pack();
+		frame.setVisible(true);
+		frame.setResizable(false);
+		frame.setSize(500, 310);
+		//Add content to the window.
+		frame.add(viewOutForm, BorderLayout.CENTER);
+		// center the frame
+		Dimension d = frame.getToolkit().getScreenSize();
+		Rectangle r = frame.getBounds();
+		frame.setLocation( (d.width - r.width)/2, (d.height - r.height)/2 );
+
+		// Button Listeners
+		sendSeleButton.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e)
+			{			
+				ArrayList<String> bids = new ArrayList<String>();
+				for(int x=0; x<model.getRowCount(); x++){
+					if(model.getValueAt(x, 5).equals(true)){
+						bids.add((String) model.getValueAt(x, 3));
+					}
+				}
+				for(String bid : bids){
+					System.out.println(bid);
+				}
+			}
+		});
+		
+		sendAllButton.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e)
+			{			
+				ArrayList<String> bids = new ArrayList<String>();
+				for(int x=0; x<model.getRowCount(); x++){
+						bids.add((String) model.getValueAt(x, 3));
+				}
+				for(String bid : bids){
+					System.out.println(bid);
+				}
+			}
+		});
+
+		closeButton.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e)
+			{
+				frame.setVisible(false);
+			}
+		});
+	}
+	
+	private void openViewPopForm(){
+		// Add check overdue Form
+		JPanel viewPopForm = new JPanel();
+		
+		final String[] columnNames = {"Call Number", "Copy #", "Title", "Out Date", "Due Date", "Out"};
+		Object[][] data = {};
+
+		final DefaultTableModel model = new DefaultTableModel(data,columnNames);
+
+	
+		// Add table to view items
+		JTable viewPopTable = new JTable(model);
+		
+		TableColumn tc = viewPopTable.getColumnModel().getColumn(5);  
+        tc.setCellEditor(viewPopTable.getDefaultEditor(Boolean.class));  
+        tc.setCellRenderer(viewPopTable.getDefaultRenderer(Boolean.class));
+
+		model.insertRow(viewPopTable.getRowCount(),new Object[]{"Call1", "1", "Book1", "date1", "date11", new Boolean(false)});
+		model.insertRow(viewPopTable.getRowCount(),new Object[]{"Call2", "2", "Book2", "date2", "date22", new Boolean(false)});
+		model.insertRow(viewPopTable.getRowCount(),new Object[]{"Call3", "3", "Book3", "date3", "date33", new Boolean(false)});
+		model.insertRow(viewPopTable.getRowCount(),new Object[]{"Call4", "4", "Book4", "date4", "date44", new Boolean(false)});
+		
+		
+		// Add table to view items
+		JScrollPane scrollPane = new JScrollPane(viewPopTable);
+		
+		JLabel topLabel = new JLabel("Top: ");
+		JTextField topField = new JTextField(10);
+		JLabel yearLabel = new JLabel("of year: ");
+		JTextField yearField = new JTextField(10);
+		JPanel topPanel = new JPanel();
+		
+		topPanel.add(topLabel);
+		topPanel.add(topField);
+		topPanel.add(yearLabel);
+		topPanel.add(yearField);
+		
+		// Buttons
+		JButton showButton = new JButton("Show");
+		JButton closeButton = new JButton("Close");
+		// Button panel
+		JPanel buttonPanel = new JPanel();
+		buttonPanel.add(showButton, BorderLayout.LINE_START);
+		buttonPanel.add(closeButton, BorderLayout.LINE_END);
+		
+
+		// Add components to panel
+		scrollPane.setPreferredSize(new Dimension(480, 200));
+		viewPopForm.add(scrollPane, BorderLayout.PAGE_START);
+		viewPopForm.add(topPanel, BorderLayout.CENTER);
+		viewPopForm.add(buttonPanel, BorderLayout.PAGE_END);
+
+		// Window
+		final JFrame frame = new JFrame("View Popular Items");
+		// Window Properties
+		frame.pack();
+		frame.setVisible(true);
+		frame.setResizable(false);
+		frame.setSize(500, 275);
+		//Add content to the window.
+		frame.add(viewPopForm, BorderLayout.CENTER);
+		// center the frame
+		Dimension d = frame.getToolkit().getScreenSize();
+		Rectangle r = frame.getBounds();
+		frame.setLocation( (d.width - r.width)/2, (d.height - r.height)/2 );
+
+		// Button Listeners
+		showButton.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e)
+			{			
+				ArrayList<String> bids = new ArrayList<String>();
+				for(int x=0; x<model.getRowCount(); x++){
+					if(model.getValueAt(x, 5).equals(true)){
+						bids.add((String) model.getValueAt(x, 3));
+					}
+				}
+				for(String bid : bids){
+					System.out.println(bid);
+				}
+			}
+		});
+
+		closeButton.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e)
+			{
+				frame.setVisible(false);
+			}
+		});
+	}
+	
 	public JComponent getLibrarianPanel(){
 
 		mainPanel = new JPanel();
@@ -185,6 +386,7 @@ public class LibrarianPanel {
 			public void actionPerformed(ActionEvent e)
 			{
 				//Execute when button is pressed
+				openViewOutForm();
 			}
 		});  
 
@@ -192,6 +394,7 @@ public class LibrarianPanel {
 			public void actionPerformed(ActionEvent e)
 			{
 				//Execute when button is pressed
+				openViewPopForm();
 			}
 		});  
 

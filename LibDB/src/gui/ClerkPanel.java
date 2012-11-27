@@ -419,7 +419,7 @@ public class ClerkPanel {
 		frame.pack();
 		frame.setVisible(true);
 		frame.setResizable(false);
-		frame.setSize(500, 300);
+		frame.setSize(500, 275);
 		//Add content to the window.
 		frame.add(overdueForm, BorderLayout.CENTER);
 		// center the frame
