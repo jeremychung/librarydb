@@ -17,6 +17,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
@@ -24,7 +25,7 @@ import main.Clerk;
 
 public class ClerkPanel {
 
-	//private JTextField bidField;
+	// Add Borrower form fields
 	private JTextField passwordField;
 	private JTextField nameField;
 	private JTextField addressField;
@@ -33,6 +34,14 @@ public class ClerkPanel {
 	private JTextField sinOrStNoField;
 	private JFormattedTextField expiryDateField;
 	private JComboBox typeComboBox;
+	
+	// Checkout form fields
+	private JTextField bidField;
+	private JTextField callNumberField;
+	
+	// Return form fields;
+	private JTextField copyNoField;
+	
 	private JPanel mainPanel;
 
 	public ClerkPanel(){
@@ -201,6 +210,238 @@ public class ClerkPanel {
 			}
 		});
 	}
+	
+	private void openCheckoutForm(){
+		// Add checkout Form
+		JPanel checkoutForm = new JPanel();
+		// Set form layout
+		checkoutForm.setLayout(new GridLayout(0, 1, 10, 10));
+		checkoutForm.setBorder(new EmptyBorder(10, 10, 10, 10) );
+
+		// Field Labels
+		JLabel bidLabel = new JLabel("Bid: ");
+		JLabel callNumberLabel = new JLabel("Call Numbers(separated by ;): ");
+		// Fields
+		bidField = new JTextField(10); 
+		callNumberField = new JTextField(10);
+		
+		// Buttons
+		JButton checkoutButton = new JButton("Checkout");
+		JButton cancelButton = new JButton("Cancel");
+
+		// Add components to panel
+		checkoutForm.add(bidLabel);
+		checkoutForm.add(bidField);
+		checkoutForm.add(callNumberLabel);
+		checkoutForm.add(callNumberField);		
+		checkoutForm.add(checkoutButton);
+		checkoutForm.add(cancelButton);
+
+		// Window
+		final JFrame frame = new JFrame("Checkout");
+		// Window Properties
+		frame.pack();
+		frame.setVisible(true);
+		frame.setResizable(false);
+		frame.setSize(200, 250);
+		//Add content to the window.
+		frame.add(checkoutForm, BorderLayout.CENTER);
+		// center the frame
+		Dimension d = frame.getToolkit().getScreenSize();
+		Rectangle r = frame.getBounds();
+		frame.setLocation( (d.width - r.width)/2, (d.height - r.height)/2 );
+
+		// Button Listeners
+		checkoutButton.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e)
+			{
+				int bid = 0;
+				try{
+					bid = Integer.parseInt(bidField.getText());
+				}
+				catch(NumberFormatException numExcept){
+					JOptionPane.showMessageDialog(null,
+							"Invalid bid.",
+							"Error",
+							JOptionPane.ERROR_MESSAGE);
+					return;
+				};
+				
+				String callNumber = callNumberField.getText();
+				if (callNumber.equals("")) {
+					JOptionPane.showMessageDialog(null,
+							"Please fill in call numbers.",
+							"Error",
+							JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+				Clerk.checkoutBooks(bid, callNumber);
+			}
+		});
+
+		cancelButton.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e)
+			{
+				frame.setVisible(false);
+			}
+		});
+	}
+	
+	private void openReturnForm(){
+		// Add checkout Form
+		JPanel returnForm = new JPanel();
+		// Set form layout
+		returnForm.setLayout(new GridLayout(0, 2, 10, 10));
+		returnForm.setBorder(new EmptyBorder(10, 10, 10, 10) );
+
+		// Field Labels
+		JLabel callNumberLabel = new JLabel("Call Number: ");
+		JLabel copyNoLabel = new JLabel("Copy Number: ");
+		// Fields
+		callNumberField = new JTextField(10);
+		copyNoField = new JTextField(10);
+		
+		// Buttons
+		JButton returnButton = new JButton("Return");
+		JButton cancelButton = new JButton("Cancel");
+
+		// Add components to panel
+		returnForm.add(callNumberLabel);
+		returnForm.add(callNumberField);
+		returnForm.add(copyNoLabel);
+		returnForm.add(copyNoField);
+		returnForm.add(returnButton);
+		returnForm.add(cancelButton);
+
+		// Window
+		final JFrame frame = new JFrame("Checkout");
+		// Window Properties
+		frame.pack();
+		frame.setVisible(true);
+		frame.setResizable(false);
+		frame.setSize(300, 150);
+		//Add content to the window.
+		frame.add(returnForm, BorderLayout.CENTER);
+		// center the frame
+		Dimension d = frame.getToolkit().getScreenSize();
+		Rectangle r = frame.getBounds();
+		frame.setLocation( (d.width - r.width)/2, (d.height - r.height)/2 );
+
+		// Button Listeners
+		returnButton.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e)
+			{				
+				String callNumber = callNumberField.getText();
+				if (callNumber.equals("")) {
+					JOptionPane.showMessageDialog(null,
+							"Please fill in call number.",
+							"Error",
+							JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+				
+				int copyNo = 0;
+				try{
+					copyNo = Integer.parseInt(bidField.getText());
+				}
+				catch(NumberFormatException numExcept){
+					JOptionPane.showMessageDialog(null,
+							"Invalid copy number.",
+							"Error",
+							JOptionPane.ERROR_MESSAGE);
+					return;
+				};
+				
+				Clerk.processReturn(callNumber, copyNo);
+			}
+		});
+
+		cancelButton.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e)
+			{
+				frame.setVisible(false);
+			}
+		});
+	}
+	
+	private void openOverdueForm(){
+		// Add check overdue Form
+		JPanel overdueForm = new JPanel();
+		// Set form layout
+		overdueForm.setLayout(new GridLayout(0, 2, 10, 10));
+		overdueForm.setBorder(new EmptyBorder(10, 10, 10, 10) );
+		
+		String[] columnNames = {"Call Number", "Copy #", "Title", "Bid", "Name"};
+		// Add table to view items
+		JTable overdueTable = new JTable();
+
+		// Field Labels
+		JLabel callNumberLabel = new JLabel("Call Number: ");
+		JLabel copyNoLabel = new JLabel("Copy Number: ");
+		// Fields
+		callNumberField = new JTextField(10);
+		copyNoField = new JTextField(10);
+		
+		// Buttons
+		JButton sendAllButton = new JButton("Send to All");
+		JButton closeButton = new JButton("Close");
+
+		// Add components to panel
+		
+		overdueForm.add(sendAllButton);
+		overdueForm.add(closeButton);
+
+		// Window
+		final JFrame frame = new JFrame("Checkout");
+		// Window Properties
+		frame.pack();
+		frame.setVisible(true);
+		frame.setResizable(false);
+		frame.setSize(300, 150);
+		//Add content to the window.
+		frame.add(overdueForm, BorderLayout.CENTER);
+		// center the frame
+		Dimension d = frame.getToolkit().getScreenSize();
+		Rectangle r = frame.getBounds();
+		frame.setLocation( (d.width - r.width)/2, (d.height - r.height)/2 );
+
+		// Button Listeners
+		sendAllButton.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e)
+			{				
+				String callNumber = callNumberField.getText();
+				if (callNumber.equals("")) {
+					JOptionPane.showMessageDialog(null,
+							"Please fill in call number.",
+							"Error",
+							JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+				
+				int copyNo = 0;
+				try{
+					copyNo = Integer.parseInt(bidField.getText());
+				}
+				catch(NumberFormatException numExcept){
+					JOptionPane.showMessageDialog(null,
+							"Invalid copy number.",
+							"Error",
+							JOptionPane.ERROR_MESSAGE);
+					return;
+				};
+				
+				Clerk.processReturn(callNumber, copyNo);
+			}
+		});
+
+		closeButton.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e)
+			{
+				frame.setVisible(false);
+			}
+		});
+	}
+
 
 	public JComponent getClerkPanel(){
 
@@ -225,6 +466,7 @@ public class ClerkPanel {
 			public void actionPerformed(ActionEvent e)
 			{
 				//Execute when button is pressed
+				openCheckoutForm();
 			}
 		});  
 
@@ -232,6 +474,7 @@ public class ClerkPanel {
 			public void actionPerformed(ActionEvent e)
 			{
 				//Execute when button is pressed
+				openReturnForm();
 			}
 		});
 		checkOverdueButton.addActionListener(new ActionListener() {
