@@ -28,6 +28,11 @@ public class Librarian {
 			// commit work 
 			LibDB.con.commit();
 			ps.close();
+			
+			JOptionPane.showMessageDialog(null,
+					"Connected to Oracle!",
+					"Information",
+					JOptionPane.INFORMATION_MESSAGE);
 		}
 		catch (SQLException ex)
 		{

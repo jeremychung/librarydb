@@ -18,20 +18,25 @@ public class Clerk {
 			ps = LibDB.con.prepareStatement("INSERT INTO borrower VALUES (borrower_counter.nextval,?,?,?,?,?,?,?,?)");
 
 			//ps.setInt(1, bid);
-			ps.setString(2, password);
-			ps.setString(3, name);
-			ps.setString(4, address);
-			ps.setInt(5, phone);
-			ps.setString(6, email);
-			ps.setInt(7, sinOrStNo);
+			ps.setString(1, password);
+			ps.setString(2, name);
+			ps.setString(3, address);
+			ps.setInt(4, phone);
+			ps.setString(5, email);
+			ps.setInt(6, sinOrStNo);
 			java.sql.Date sqlDate = new java.sql.Date(expiryDate.getTime());
-			ps.setDate(8, sqlDate);
-			ps.setString(9, type);
+			ps.setDate(7, sqlDate);
+			ps.setString(8, type);
 
 			ps.executeUpdate();
 			// commit work 
 			LibDB.con.commit();
 			ps.close();
+			
+			JOptionPane.showMessageDialog(null,
+					"Borrower added.",
+					"Information",
+					JOptionPane.INFORMATION_MESSAGE);
 		}
 		catch (SQLException ex)
 		{

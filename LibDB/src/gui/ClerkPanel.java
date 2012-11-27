@@ -7,9 +7,12 @@ import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
+import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFormattedTextField;
@@ -17,9 +20,14 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableModel;
 
 import main.Clerk;
 
@@ -367,37 +375,51 @@ public class ClerkPanel {
 	private void openOverdueForm(){
 		// Add check overdue Form
 		JPanel overdueForm = new JPanel();
-		// Set form layout
-		overdueForm.setLayout(new GridLayout(0, 2, 10, 10));
-		overdueForm.setBorder(new EmptyBorder(10, 10, 10, 10) );
 		
-		String[] columnNames = {"Call Number", "Copy #", "Title", "Bid", "Name"};
-		// Add table to view items
-		JTable overdueTable = new JTable();
+		final String[] columnNames = {"Call Number", "Copy #", "Title", "Bid", "Name", "Select"};
+		Object[][] data = {};
 
-		// Field Labels
-		JLabel callNumberLabel = new JLabel("Call Number: ");
-		JLabel copyNoLabel = new JLabel("Copy Number: ");
-		// Fields
-		callNumberField = new JTextField(10);
-		copyNoField = new JTextField(10);
+		final DefaultTableModel model = new DefaultTableModel(data,columnNames);
+
+	
+		// Add table to view items
+		JTable overdueTable = new JTable(model);
+		
+		TableColumn tc = overdueTable.getColumnModel().getColumn(5);  
+        tc.setCellEditor(overdueTable.getDefaultEditor(Boolean.class));  
+        tc.setCellRenderer(overdueTable.getDefaultRenderer(Boolean.class));
+
+		model.insertRow(overdueTable.getRowCount(),new Object[]{"Call1", "1", "Book1", "11", "Mark", new Boolean(false)});
+		model.insertRow(overdueTable.getRowCount(),new Object[]{"Call2", "2", "Book2", "22", "John", new Boolean(false)});
+		model.insertRow(overdueTable.getRowCount(),new Object[]{"Call3", "3", "Book3", "33", "Sam", new Boolean(false)});
+		model.insertRow(overdueTable.getRowCount(),new Object[]{"Call4", "4", "Book4", "44", "Bill", new Boolean(false)});
+		
+		
+		// Add table to view items
+		JScrollPane scrollPane = new JScrollPane(overdueTable);
 		
 		// Buttons
+		JButton sendSeleButton = new JButton("Send to selected");
 		JButton sendAllButton = new JButton("Send to All");
 		JButton closeButton = new JButton("Close");
+		// Button panel
+		JPanel buttonPanel = new JPanel();
+		buttonPanel.add(sendSeleButton);
+		buttonPanel.add(sendAllButton);
+		buttonPanel.add(closeButton);
 
 		// Add components to panel
-		
-		overdueForm.add(sendAllButton);
-		overdueForm.add(closeButton);
+		scrollPane.setPreferredSize(new Dimension(480, 200));
+		overdueForm.add(scrollPane, BorderLayout.CENTER);
+		overdueForm.add(buttonPanel, BorderLayout.PAGE_END);
 
 		// Window
-		final JFrame frame = new JFrame("Checkout");
+		final JFrame frame = new JFrame("Overdue Items");
 		// Window Properties
 		frame.pack();
 		frame.setVisible(true);
 		frame.setResizable(false);
-		frame.setSize(300, 150);
+		frame.setSize(500, 300);
 		//Add content to the window.
 		frame.add(overdueForm, BorderLayout.CENTER);
 		// center the frame
@@ -406,31 +428,31 @@ public class ClerkPanel {
 		frame.setLocation( (d.width - r.width)/2, (d.height - r.height)/2 );
 
 		// Button Listeners
+		sendSeleButton.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e)
+			{			
+				ArrayList<String> bids = new ArrayList<String>();
+				for(int x=0; x<model.getRowCount(); x++){
+					if(model.getValueAt(x, 5).equals(true)){
+						bids.add((String) model.getValueAt(x, 3));
+					}
+				}
+				for(String bid : bids){
+					System.out.println(bid);
+				}
+			}
+		});
+		
 		sendAllButton.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e)
-			{				
-				String callNumber = callNumberField.getText();
-				if (callNumber.equals("")) {
-					JOptionPane.showMessageDialog(null,
-							"Please fill in call number.",
-							"Error",
-							JOptionPane.ERROR_MESSAGE);
-					return;
+			{			
+				ArrayList<String> bids = new ArrayList<String>();
+				for(int x=0; x<model.getRowCount(); x++){
+						bids.add((String) model.getValueAt(x, 3));
 				}
-				
-				int copyNo = 0;
-				try{
-					copyNo = Integer.parseInt(bidField.getText());
+				for(String bid : bids){
+					System.out.println(bid);
 				}
-				catch(NumberFormatException numExcept){
-					JOptionPane.showMessageDialog(null,
-							"Invalid copy number.",
-							"Error",
-							JOptionPane.ERROR_MESSAGE);
-					return;
-				};
-				
-				Clerk.processReturn(callNumber, copyNo);
 			}
 		});
 
@@ -481,6 +503,7 @@ public class ClerkPanel {
 			public void actionPerformed(ActionEvent e)
 			{
 				//Execute when button is pressed
+				openOverdueForm();
 			}
 		});  
 
