@@ -4,9 +4,7 @@ import gui.LibrarianPanel;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Date;
 
 import javax.swing.JOptionPane;
@@ -106,20 +104,20 @@ public class Librarian {
 
 		try{
 			if (subject.equals("")){
-				ps = LibDB.con.prepareStatement("SELECT BookCopy.callNumber, BookCopy.copyNo, Borrowing.outDate, Borrowing.inDate" +
-						"FROM BookCopy" +
-						"LEFT JOIN Borrowing" +
-						"ON BookCopy.callNumber=Borrowing.callNumber AND BookCopy.copyNo=Borrowing.copyNO" +
-						"WHERE BookCopy.status = 'out'" +
+				ps = LibDB.con.prepareStatement("SELECT BookCopy.callNumber, BookCopy.copyNo, Borrowing.outDate, Borrowing.inDate " +
+						"FROM BookCopy " +
+						"LEFT JOIN Borrowing " +
+						"ON BookCopy.callNumber=Borrowing.callNumber AND BookCopy.copyNo=Borrowing.copyNO " +
+						"WHERE BookCopy.status = 'out' " +
 						"ORDER BY BookCopy.callNumber");
 			}else{
-				ps = LibDB.con.prepareStatement("SELECT BookCopy.callNumber, BookCopy.copyNo, Borrowing.outDate, Borrowing.inDate" +
-						"FROM BookCopy" +
-						"LEFT JOIN Borrowing" +
-						"ON BookCopy.callNumber=Borrowing.callNumber AND BookCopy.copyNo=Borrowing.copyNO" +
-						"LEFT JOIN HasSubject" +
-						"ON BookCopy.callNumber=HasSubject.callNumber" +
-						"WHERE BookCopy.status = 'out' AND HasSubject.subject = ?" +
+				ps = LibDB.con.prepareStatement("SELECT BookCopy.callNumber, BookCopy.copyNo, Borrowing.outDate, Borrowing.inDate " +
+						"FROM BookCopy " +
+						"LEFT JOIN Borrowing " +
+						"ON BookCopy.callNumber=Borrowing.callNumber AND BookCopy.copyNo=Borrowing.copyNO " +
+						"LEFT JOIN HasSubject " +
+						"ON BookCopy.callNumber=HasSubject.callNumber " +
+						"WHERE BookCopy.status = 'out' AND HasSubject.subject = ? " +
 						"ORDER BY BookCopy.callNumber");
 				ps.setString(1, subject);
 			}
@@ -149,8 +147,6 @@ public class Librarian {
 					JOptionPane.ERROR_MESSAGE);
 		}
 	}
-
-	//Need to find out how to flag things
 
 	public static void popularItems(int year, int n){
 		int callNumber;

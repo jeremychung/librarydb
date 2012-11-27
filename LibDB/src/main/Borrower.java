@@ -24,22 +24,22 @@ public class Borrower {
 
 		if(!title.equals("")){
 			titleStatement = 
-					"(SELECT callNumber" +
-							"FROM Book" +
+					"(SELECT callNumber " +
+							"FROM Book " +
 							"WHERE title LIKE '%" +title+ "%')" +
 							"UNION";
 		}
 		if(!author.equals("")){
 			authStatement = 
-					"(SELECT callNumber" +
-							"FROM HasAuthor" +
+					"(SELECT callNumber " +
+							"FROM HasAuthor " +
 							"WHERE name LIKE '%" +author+ "%')" +
 							"UNION";
 		}
 		if(!subject.equals("")){
 			subStatement = 
-					"(SELECT callNumber" +
-							"FROM Book" +
+					"(SELECT callNumber " +
+							"FROM Book " +
 							"WHERE title LIKE '%" +subject+ "%')" +
 							"UNION";
 		}
@@ -64,8 +64,8 @@ public class Borrower {
 					ResultSet  rs2;
 					
 					ps2 = LibDB.con.prepareStatement(
-							"SELECT COUNT(*)" +
-							"FROM BookCopy" +
+							"SELECT COUNT(*) " +
+							"FROM BookCopy " +
 							"WHERE status = 'in' AND callNumber = ?");
 					ps2.setString(1, callNumber);
 					
@@ -88,8 +88,8 @@ public class Borrower {
 					ResultSet  rs2;
 					
 					ps2 = LibDB.con.prepareStatement(
-							"SELECT COUNT(*)" +
-							"FROM Book" +
+							"SELECT COUNT(*) " +
+							"FROM Book " +
 							"WHERE status = 'out' AND callNumber = ?");
 					ps2.setString(1, callNumber);
 					
@@ -140,8 +140,8 @@ public class Borrower {
 		
 		try {
 			ps = LibDB.con.prepareStatement(
-					"SELECT callNumber, copyNo, outDate" +
-					"FROM Borrowing, BookCopy" +
+					"SELECT callNumber, copyNo, outDate " +
+					"FROM Borrowing, BookCopy " +
 					"WHERE Borrowing.callNumber = BookCopy.callNumber AND Borrowing.copyNo = BookCopy.copyNo AND BookCopy.status = 'out' AND Borrowing.bid = ?");
 			ps.setInt(1, bid);
 			
@@ -176,8 +176,8 @@ public class Borrower {
 		try
 		{
 			ps = LibDB.con.prepareStatement(
-					"SELECT Borrowing.callNumber, Borrowing.copyNo, Fine.fid, Fine.amount, Fine.issuedDate" +
-					"FROM Borrowing, Fine" +
+					"SELECT Borrowing.callNumber, Borrowing.copyNo, Fine.fid, Fine.amount, Fine.issuedDate " +
+					"FROM Borrowing, Fine " +
 					"WHERE Borrowing.borid = Fine.borid AND Fine.paidDate IS NULL AND Borrowing.bid = ?");
 			ps.setInt(1, bid);
 			
@@ -218,8 +218,8 @@ public class Borrower {
 		try
 		{
 			ps = LibDB.con.prepareStatement(
-					"SELECT HoldRequest.hid, HoldRequest.issuedDate, Book.callNumber, Book.title, Book.isbn, Book.mainAuthor" +
-					"FROM HoldRequest, Book" +
+					"SELECT HoldRequest.hid, HoldRequest.issuedDate, Book.callNumber, Book.title, Book.isbn, Book.mainAuthor " +
+					"FROM HoldRequest, Book " +
 					"WHERE HoldRequest.callNumber = Book.callNumber AND HoldRequest.bid = ?");
 			ps.setInt(1, bid);
 			
@@ -257,8 +257,8 @@ public class Borrower {
 		// Check to see if borrower is already holding the item.
 		try {
 			ps = LibDB.con.prepareStatement(
-					"SELECT COUNT(*)" +
-					"FROM HoldRequest" +
+					"SELECT COUNT(*) " +
+					"FROM HoldRequest " +
 					"WHERE bid = ? AND callNumber = ?");
 			ps.setInt(1, bid);
 			ps.setString(2, callNumber);
@@ -286,8 +286,8 @@ public class Borrower {
 		// Check to see if all copies of item is out
 		try {
 			ps = LibDB.con.prepareStatement(
-					"SELECT COUNT(*)" +
-					"FROM BookCopy" +
+					"SELECT COUNT(*) " +
+					"FROM BookCopy " +
 					"WHERE status <> 'out' AND callNumber = ?");
 			ps.setString(1, callNumber);
 			
@@ -357,8 +357,8 @@ public class Borrower {
 		// Check to see if fine is attached to borrower.
 		try {
 			ps = LibDB.con.prepareStatement(
-					"SELECT Fine.amount, Fine.issuedDate" +
-					"FROM Borrowing, Fine" +
+					"SELECT Fine.amount, Fine.issuedDate " +
+					"FROM Borrowing, Fine " +
 					"WHERE Borrowing.borid = Fine.borid AND Fine.paidDate IS NULL AND Borrowing.bid = " + bid + " AND Fine.fid = " + fid);
 			
 			rs = ps.executeQuery();
@@ -388,8 +388,8 @@ public class Borrower {
 			java.sql.Date sqlDate = new java.sql.Date(utlDate.getTime());
 			
 			ps = LibDB.con.prepareStatement(
-					"UPDATE Fine" +
-					"SET paidDate=?" +
+					"UPDATE Fine " +
+					"SET paidDate=? " +
 					"WHERE fid = ?");
 			ps.setDate(1, sqlDate);
 			ps.setInt(2, fid);

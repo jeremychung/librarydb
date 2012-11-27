@@ -6,8 +6,6 @@ import java.awt.GridLayout;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.Date;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -186,7 +184,6 @@ public class LibrarianPanel {
 		Object[][] data = {};
 
 		outModel = new DefaultTableModel(data,columnNames);
-
 	
 		// Add table to view items
 		viewOutTable = new JTable(outModel);
@@ -246,34 +243,6 @@ public class LibrarianPanel {
 				Librarian.checkedOutItems(subjects);
 			}
 		});
-		
-		sendSeleButton.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent e)
-			{			
-//				ArrayList<String> bids = new ArrayList<String>();
-//				for(int x=0; x<model.getRowCount(); x++){
-//					if(model.getValueAt(x, 5).equals(true)){
-//						bids.add((String) model.getValueAt(x, 3));
-//					}
-//				}
-//				for(String bid : bids){
-//					System.out.println(bid);
-//				}
-			}
-		});
-		
-		sendAllButton.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent e)
-			{			
-//				ArrayList<String> bids = new ArrayList<String>();
-//				for(int x=0; x<model.getRowCount(); x++){
-//						bids.add((String) model.getValueAt(x, 3));
-//				}
-//				for(String bid : bids){
-//					System.out.println(bid);
-//				}
-			}
-		});
 
 		closeButton.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e)
@@ -294,12 +263,6 @@ public class LibrarianPanel {
 
 		// Add table to view items
 		viewPopTable = new JTable(popModel);
-
-		//model.insertRow(viewPopTable.getRowCount(),new Object[]{callNumber, isbn, title, mainAuthor, publisher, year});
-//		popModel.insertRow(viewPopTable.getRowCount(),new Object[]{"Call2", "2", "Book2", "date2", "date22", new Boolean(false)});
-//		popModel.insertRow(viewPopTable.getRowCount(),new Object[]{"Call3", "3", "Book3", "date3", "date33", new Boolean(false)});
-//		popModel.insertRow(viewPopTable.getRowCount(),new Object[]{"Call4", "4", "Book4", "date4", "date44", new Boolean(false)});
-		
 		
 		// Add table to view items
 		JScrollPane scrollPane = new JScrollPane(viewPopTable);

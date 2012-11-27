@@ -14,10 +14,9 @@ public class Clerk {
 	{
 		PreparedStatement  ps;
 
-		try{
-			ps = LibDB.con.prepareStatement("INSERT INTO borrower VALUES (borrower_counter.nextval,?,?,?,?,?,?,?,?)");
+		try {
+			ps = LibDB.con.prepareStatement("INSERT INTO borrower VALUES (bid_counter.nextval,?,?,?,?,?,?,?,?)");
 
-			//ps.setInt(1, bid);
 			ps.setString(1, password);
 			ps.setString(2, name);
 			ps.setString(3, address);
@@ -59,64 +58,90 @@ public class Clerk {
 		}
 	}
 	
-	public static void checkoutBooks(int bid, String callNumbers){
+	// TODO display/print receipt
+	public static void checkoutBooks(int bid, String callNumbers) {
+		// Check borrower account validity
+		if (!expired(bid)) {
+			return;
+		}
+		
 		String[] callNums = callNumbers.split(";");
-		for(String callNumber : callNums){
+		for(String callNumber : callNums) {
 			checkOut(bid, callNumber.trim());
 		}
 	}
 
-	// NOTE: Some functions still needs to be implemented including checking if the duedate has passed or not
-	// Will have bugs since I wrote this in a text editor
-	// Table creating code needs to be edited so that inDate can be null
-	public static void checkOut(int bid, String callNumber)
-	{
-		if(expired(bid)==false){
 
-			PreparedStatement ps;
-			ResultSet rs;
+	// TODO remove HoldRequest once borrower picks up reserved copy.
+	public static void checkOut(int bid, String callNumber) {
 
-			try
-			{
-				// Process borrowing
-				ps = LibDB.con.prepareStatement( "SELECT * FROM BookCopy WHERE callNumber = ? AND status = 'in'" );
-				ps.setString( 1, callNumber);
-				rs = ps.executeQuery();
+		PreparedStatement ps;
+		ResultSet rs;
+		
+		int copyNo;
+		
+		// Try to find available copy
+		try {
+			ps = LibDB.con.prepareStatement( "SELECT * FROM BookCopy WHERE callNumber = ? AND status = 'in'" );
+			ps.setString( 1, callNumber);
 
-				// if true, a copy is available to be borrowed.
-				if(rs.next())
-				{
-					PreparedStatement ps2;
-					ResultSet rs2;
-					int copyNo = rs.getInt("copyNo");	
-
-					try{				
-
-						ps2 = LibDB.con.prepareStatement("INSERT into Borrowing Values (borid_counter.nextval, ?, ?, sysdate, null)");
-						ps2.setInt(2, bid);
-						ps2.setString( 3, callNumber);
-						ps2.setInt(4, copyNo);
-
-						ps2.executeUpdate();
-
-						String dueDate = getDuedate( callNumber, borrowerType );	// implement this function
-						System.out.println( "Due Date of " + callNumber + " is: " + dueDate + "." );	// so that clerk can give a note to the borrower.
-					}catch(SQLException ex){
-
-					}
-				}
-				else
-				{
-					System.out.println( "No copies of " + callNumber + " is available." );
-				}
-
-
-				// commit work 
-				LibDB.con.commit();
+			rs = ps.executeQuery();
+			
+			
+			// check to see if a copy is ready to be borrowed
+			if(!rs.next()) {
+				JOptionPane.showMessageDialog(null,
+						"No Copies Available for " + callNumber,
+						"Information",
+						JOptionPane.INFORMATION_MESSAGE);
+				ps.close();
+				return;
+			} else {
+				copyNo = rs.getInt("copyNo");
 				ps.close();
 			}
-			catch (SQLException ex2)
-			{
+		} catch (SQLException ex) {
+			JOptionPane.showMessageDialog(null,
+					"Message: " + ex.getMessage(),
+					"Error",
+					JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		
+		// Process Borrowing
+		try {
+
+			int borrowDuration = getBorrowDuration(getBorrowerType(bid));
+			
+			ps = LibDB.con.prepareStatement("INSERT INTO Borrowing VALUES (borid_counter.nextval, ?, ?, ?, SYSDATE, SYSDATE + ?)");
+			ps.setInt(1, bid);
+			ps.setString( 2, callNumber);
+			ps.setInt(3, copyNo);
+			ps.setInt(4, borrowDuration);
+
+			ps.executeUpdate();
+			
+			PreparedStatement ps2;
+			
+			// Update status of item copy
+			ps2 = LibDB.con.prepareStatement("UPDATE BookCopy SET status='out' WHERE BookCopy.callNumber = ? AND BookCopy.copyNo = ?");
+			ps2.setString(1, callNumber);
+			ps2.setInt(2, copyNo);
+			
+			ps2.executeUpdate();
+
+			LibDB.con.commit();
+			ps.close();
+			ps2.close();
+		} catch (SQLException ex) {
+			JOptionPane.showMessageDialog(null,
+					"Message: " + ex.getMessage(),
+					"Error",
+					JOptionPane.ERROR_MESSAGE);
+			try {
+				// undo the insert
+				LibDB.con.rollback();
+			} catch (SQLException ex2) {
 				JOptionPane.showMessageDialog(null,
 						"Message: " + ex2.getMessage(),
 						"Error",
@@ -127,68 +152,148 @@ public class Clerk {
 
 	public static void processReturn(String callNumber, int copyNo)
 	{
-		boolean onHold = false;
 		int bid;
 		int borid;
+		Date outDate;
+		Date dueDate;
 		java.sql.Date sqlDate;
 		String type;
 
 		PreparedStatement ps;
 		ResultSet rs;
-
-		try
-		{
-			// See if on hold
-			ps = LibDB.con.prepareStatement("SELECT * FROM HoldRequest WHERE callNumber = ?");
-
-			ps.setString(1, callNumber);
-
-			rs = ps.executeQuery();
-
-			if (rs.next())
-				onHold = true;
-
-			// if using indate as returned date
-			ps = LibDB.con.prepareStatement( "SELECT bid, borid, outDate, type FROM Borrowing, Borrower, BookCopy WHERE status = 'out' AND callNumber = ? AND copyNo = ?" );
+		
+		// Find borrower of book
+		try {
+			// using inDate as dueDate
+			ps = LibDB.con.prepareStatement(
+					"SELECT borid, bid, outDate, inDate, status " +
+					"FROM Borrowing, BookCopy " +
+					"WHERE Borrowing.callNumber = BookCopy.callNumber AND Borrowing.CopyNo = BookCopy.copyNo AND callNumber = ? AND copyNo = ? AND status = 'out' " +
+					"ORDER BY outDate DESC");
 			ps.setString(1, callNumber);
 			ps.setInt(2, copyNo);
-
+			
 			rs = ps.executeQuery();
 
-			bid = rs.getInt( "bid" );
-			borid = rs.getInt( "borid" );
-			sqlDate = rs.getDate( "outDate" );
-			type = rs.getString( "type" );
-
-			// This function has to be implemented if using latter approach
-			if ( checkDueDatePassed( sqlDate, type ) )
-				generateFine();	// implement
-
-
-			// update status of the item
-			ps = LibDB.con.prepareStatement( "UPDATE BookCopy SET status = ? WHERE callNumber = ? AND copyNo = ?" );
-
-			if ( onHOld )
-				ps.setString( 1, "on hold" );	// also send a message to the holder
-			else
-				ps.setString( 1, "in" );
-
-			ps.setString( 2, callNumber );
-			ps.setString( 3, copyNo );
-
-			ps.executeUpdate();
-
-			// commit work 
-			LibDB.con.commit();
+			if (rs.next()) {
+				if (rs.getString("status").equals("out")) {
+					bid = rs.getInt("bid"); // Got the borrower.
+					borid = rs.getInt("borid"); // For Fine
+					outDate = rs.getDate("outDate"); // Also not very useful
+					dueDate = rs.getDate("inDate"); // due date
+				} else {
+					JOptionPane.showMessageDialog(null,
+							"Book is not checked out!",
+							"Error",
+							JOptionPane.ERROR_MESSAGE);
+					ps.close();
+					return;
+				}
+			} else {
+				JOptionPane.showMessageDialog(null,
+						"Book was never checked out!",
+						"Error",
+						JOptionPane.ERROR_MESSAGE);
+				ps.close();
+				return;
+			}
 			ps.close();
-		}
-		catch ( SQLException ex )
-		{
+		} catch (SQLException ex)	{
 			JOptionPane.showMessageDialog(null,
 					"Message: " + ex.getMessage(),
 					"Error",
 					JOptionPane.ERROR_MESSAGE);
+			return;
 		}
+		
+		// If book was overdue
+		// Charge everybody $10
+		if(new Date().after(dueDate)) {
+			try {
+				// Fine the borrower
+				ps = LibDB.con.prepareStatement("INSERT INTO Fine VALUES (fid_counter.nextval, 10, SYSDATE, NULL, ?)");
+				ps.setInt(1, borid);
+
+				ps.executeUpdate();
+				
+				LibDB.con.commit();
+				ps.close();
+			} catch (SQLException ex) {
+				JOptionPane.showMessageDialog(null,
+						"Message: " + ex.getMessage(),
+						"Error",
+						JOptionPane.ERROR_MESSAGE);
+				try {
+					// undo the insert
+					LibDB.con.rollback();
+				} catch (SQLException ex2) {
+					JOptionPane.showMessageDialog(null,
+							"Message: " + ex2.getMessage(),
+							"Error",
+							JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		}
+		
+		// TODO send email to hold requester
+		// if book was on hold
+		int bidHolding;
+		if(onHold(callNumber)) {
+			try {
+				// Change item copy status to on hold.
+				ps = LibDB.con.prepareStatement("UPDATE BookCopy SET status='on hold' WHERE BookCopy.callNumber = ? AND BookCopy.copyNo = ?");
+				ps.setString( 1, callNumber);
+				ps.setInt(2, copyNo);
+				
+				ps.executeUpdate();
+				LibDB.con.commit();
+				ps.close();
+				
+				// find hold requester and send message/email
+				try {
+					ps = LibDB.con.prepareStatement(
+							"SELECT hid, bid, callNumber, issuedDate " +
+							"FROM HoldRequest " +
+							"WHERE callNumber = ? " +
+							"ORDER BY issedDate ASC");
+					ps.setString(1, callNumber);
+					
+					rs = ps.executeQuery();
+					
+					if (rs.next()) {
+						bidHolding = rs.getInt("bid"); // get hold requester
+					}
+					
+					ps.close();
+					
+				} catch (SQLException ex)	{
+					JOptionPane.showMessageDialog(null,
+							"Message: " + ex.getMessage(),
+							"Error",
+							JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+				
+			} catch (SQLException ex) {
+				JOptionPane.showMessageDialog(null,
+						"Message: " + ex.getMessage(),
+						"Error",
+						JOptionPane.ERROR_MESSAGE);
+				try {
+					// undo the insert
+					LibDB.con.rollback();
+				} catch (SQLException ex2) {
+					JOptionPane.showMessageDialog(null,
+							"Message: " + ex2.getMessage(),
+							"Error",
+							JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		}
+		
+		
+		
+		
 	}
 
 	public void checkOverdue()
@@ -259,24 +364,23 @@ public class Clerk {
 		}
 	}
 
-	public boolean onHold(String callNumber){
-		boolean onHold = true;
+	public static boolean onHold(String callNumber) {
+		boolean onHold = false;;
 		PreparedStatement ps;
 		ResultSet rs;
-		try{
+		try {
 			// See if on hold
-			ps = LibDB.con.prepareStatement("SELECT * FROM HoldRequest WHERE callNumber = ?");
-
+			ps = LibDB.con.prepareStatement("SELECT hid FROM HoldRequest WHERE callNumber = ?");
 			ps.setString(1, callNumber);
 
 			rs = ps.executeQuery();
 
 			if(rs.next()){
 				onHold = true;
-			}else{
+			} else {
 				onHold = false;
 			}
-		}catch(SQLException ex){
+		} catch(SQLException ex) {
 			JOptionPane.showMessageDialog(null,
 					"Message: " + ex.getMessage(),
 					"Error",
@@ -285,7 +389,7 @@ public class Clerk {
 		return onHold;
 	}
 
-	public static boolean expired(int bid){
+	public static boolean expired(int bid) {
 
 		boolean expired = true;
 		PreparedStatement  ps;
@@ -293,17 +397,18 @@ public class Clerk {
 
 		try
 		{
-			ps = LibDB.con.prepareStatement("SELECT * FROM Borrower WHERE bid = ? AND expiryDate <= sysdate");
-
+			ps = LibDB.con.prepareStatement("SELECT * FROM Borrower WHERE bid = ? AND expiryDate <= TRUNC(SYSDATE)");
+			ps.setInt(1, bid);
+			
 			rs = ps.executeQuery();
 
-			if(!rs.next()){
+			if (!rs.next()) {
 				JOptionPane.showMessageDialog(null,
 						"Account expired or does not exist!",
 						"Error",
 						JOptionPane.ERROR_MESSAGE);
 				expired = true;
-			}else 
+			} else 
 				expired = false;
 
 			// close the statement; 
@@ -318,6 +423,59 @@ public class Clerk {
 					JOptionPane.ERROR_MESSAGE);
 		}
 		return expired;
+	}
+	
+	public static String getBorrowerType(int bid) {
+
+		PreparedStatement  ps;
+		ResultSet  rs;
+
+		try
+		{
+			ps = LibDB.con.prepareStatement("SELECT type FROM Borrower WHERE bid = ?");
+			ps.setInt(1, bid);
+			
+			rs = ps.executeQuery();
+
+			if (!rs.next()) {
+				JOptionPane.showMessageDialog(null,
+						"No type associated with Borrower account.",
+						"Error",
+						JOptionPane.ERROR_MESSAGE);
+				ps.close();
+				return null;
+			} else {
+				ps.close();
+				return rs.getString("type");
+			}
+			
+		}
+		catch (SQLException ex)
+		{
+			JOptionPane.showMessageDialog(null,
+					"Message: " + ex.getMessage(),
+					"Error",
+					JOptionPane.ERROR_MESSAGE);
+			return null;
+		}
+	}
+	
+	public static int getBorrowDuration(String borrowerType) {
+		int borrowDuration; // maximum borrow duration in days
+		if (borrowerType.equals("Student")) {
+			borrowDuration = 14;
+		} else if (borrowerType.equals("Faculty")) {
+			borrowDuration = 84;
+		} else if (borrowerType.equals("Staff")) {
+			borrowDuration = 42;
+		} else {
+			JOptionPane.showMessageDialog(null,
+					"Unknown borrower acount type.",
+					"Error",
+					JOptionPane.ERROR_MESSAGE);
+			borrowDuration = 0;
+		}
+		return borrowDuration;
 	}
 
 }
