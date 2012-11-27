@@ -1,6 +1,5 @@
 package main;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Date;
@@ -8,30 +7,16 @@ import java.util.Date;
 import javax.swing.JOptionPane;
 
 public class Clerk {
-	private Connection con;
 
-	public Clerk(){
-		this.con = LibDB.con;
-	}
-
-	public void addBorrower(Borrower borrower){
-
-		int bid = borrower.getBid();
-		String password = borrower.getPassword();
-		String name = borrower.getName();
-		String address = borrower.getAddress();
-		int phone = borrower.getPhone();
-		String email = borrower.getEmail();
-		int sinOrStNo = borrower.getSinOrStNo();
-		Date expiryDate = borrower.getExpiryDate();
-		String type = borrower.getType();
+	public static void addBorrower(String password, String name, String address, int phone, 
+			String email, int sinOrStNo, Date expiryDate, String type){
 
 		PreparedStatement  ps;
 
 		try{
-			ps = con.prepareStatement("INSERT INTO borrower VALUES (?,?,?,?,?,?,?,?,?)");
+			ps = LibDB.con.prepareStatement("INSERT INTO borrower VALUES (borrower_counter.nextval,?,?,?,?,?,?,?,?)");
 
-			ps.setInt(1, bid);
+			//ps.setInt(1, bid);
 			ps.setString(2, password);
 			ps.setString(3, name);
 			ps.setString(4, address);
@@ -44,7 +29,7 @@ public class Clerk {
 
 			ps.executeUpdate();
 			// commit work 
-			con.commit();
+			LibDB.con.commit();
 			ps.close();
 		}
 		catch (SQLException ex)
@@ -56,7 +41,7 @@ public class Clerk {
 			try 
 			{
 				// undo the insert
-				con.rollback();	
+				LibDB.con.rollback();	
 			}
 			catch (SQLException ex2)
 			{
@@ -67,7 +52,6 @@ public class Clerk {
 			}
 		}
 	}
-
 
 	public void checkOut(int bid, int[] callNumbers){
 		// check out items

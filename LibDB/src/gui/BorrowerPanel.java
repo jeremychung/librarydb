@@ -21,7 +21,6 @@ public class BorrowerPanel {
 	private JTextField searchField;
 	private JPanel mainPanel;
 	
-	
 	public BorrowerPanel(){
 	}
 	

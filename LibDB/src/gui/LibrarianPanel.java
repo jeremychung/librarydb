@@ -16,7 +16,6 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
-import main.Book;
 import main.Librarian;
 
 public class LibrarianPanel {
@@ -28,10 +27,7 @@ public class LibrarianPanel {
 	private JTextField publisherField;
 	private JTextField yearField;
 	private JPanel mainPanel;
-	private Librarian librarian;
 
-	public LibrarianPanel(){
-	}
 	private void openAddBookForm(){
 		// Add Book Form
 		JPanel addBookForm = new JPanel();
@@ -40,7 +36,6 @@ public class LibrarianPanel {
 		addBookForm.setBorder(new EmptyBorder(10, 10, 10, 10) );
 
 		// Field Labels
-		JLabel callNumberLabel = new JLabel("Call #: ");
 		JLabel isbnLabel = new JLabel("ISBN: ");
 		JLabel titleLabel = new JLabel("Title: ");
 		JLabel mainAuthorLabel = new JLabel("Main Author: ");
@@ -48,7 +43,6 @@ public class LibrarianPanel {
 		JLabel yearLabel = new JLabel("Year: ");
 
 		// Fields
-		callNumberField = new JTextField(10);
 		isbnField = new JTextField(10);
 		titleField = new JTextField(10);
 		mainAuthorField = new JTextField(10);
@@ -60,8 +54,6 @@ public class LibrarianPanel {
 		JButton cancelButton = new JButton("Cancel");
 
 		// Add components to panel
-		addBookForm.add(callNumberLabel);
-		addBookForm.add(callNumberField);
 		addBookForm.add(isbnLabel);
 		addBookForm.add(isbnField);
 		addBookForm.add(titleLabel);
@@ -95,15 +87,6 @@ public class LibrarianPanel {
 		addButton.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e)
 			{
-				String callNo = callNumberField.getText();
-				if (callNo.equals("")) {
-					JOptionPane.showMessageDialog(null,
-							"Please fill in Call Number.",
-							"Error",
-							JOptionPane.ERROR_MESSAGE);
-					return;
-				}
-
 				int isbn = 0;
 				try{
 					isbn = Integer.parseInt(isbnField.getText());
@@ -154,9 +137,7 @@ public class LibrarianPanel {
 							JOptionPane.ERROR_MESSAGE);
 					return;
 				};
-				Book book = new Book(callNo, isbn, title, mainAuthor, publisher, year);
-				librarian = new Librarian();
-				librarian.addBook(book);
+				Librarian.addBook(isbn, title, mainAuthor, publisher, year);
 				frame.setVisible(false);
 			}
 		});

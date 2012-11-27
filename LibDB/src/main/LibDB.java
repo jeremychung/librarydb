@@ -24,6 +24,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
@@ -131,7 +132,10 @@ public class LibDB implements ActionListener {
 			DriverManager.registerDriver(new oracle.jdbc.driver.OracleDriver());
 		}
 		catch (SQLException ex){
-			System.out.println("Message: " + ex.getMessage());
+			JOptionPane.showMessageDialog(null,
+					"Message: " + ex.getMessage(),
+					"Error",
+					JOptionPane.ERROR_MESSAGE);
 			System.exit(-1);
 		}
 	}
@@ -145,11 +149,18 @@ public class LibDB implements ActionListener {
 		try{
 			con = DriverManager.getConnection(connectURL,username,password);
 
-			System.out.println("\nConnected to Oracle!");
+			//System.out.println("\nConnected to Oracle!");
+			JOptionPane.showMessageDialog(null,
+					"Connected to Oracle!",
+					"Information",
+					JOptionPane.INFORMATION_MESSAGE);
 			return true;
 		}
 		catch (SQLException ex){
-			System.out.println("Message: " + ex.getMessage());
+			JOptionPane.showMessageDialog(null,
+					"Message: " + ex.getMessage(),
+					"Error",
+					JOptionPane.ERROR_MESSAGE);
 			return false;
 		}
 	}

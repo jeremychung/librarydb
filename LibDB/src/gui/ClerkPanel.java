@@ -20,12 +20,11 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
-import main.Borrower;
 import main.Clerk;
 
 public class ClerkPanel {
 
-	private JTextField bidField;
+	//private JTextField bidField;
 	private JTextField passwordField;
 	private JTextField nameField;
 	private JTextField addressField;
@@ -35,7 +34,6 @@ public class ClerkPanel {
 	private JFormattedTextField expiryDateField;
 	private JComboBox typeComboBox;
 	private JPanel mainPanel;
-	private Clerk clerk;
 
 	public ClerkPanel(){
 	}
@@ -48,7 +46,6 @@ public class ClerkPanel {
 		addBorrowerForm.setBorder(new EmptyBorder(10, 10, 10, 10) );
 
 		// Field Labels
-		JLabel bidLabel = new JLabel("Bid: ");
 		JLabel passwordLabel = new JLabel("Password: ");
 		JLabel nameLabel = new JLabel("Name: ");
 		JLabel addressLabel = new JLabel("Address: ");
@@ -59,7 +56,6 @@ public class ClerkPanel {
 		JLabel typeLabel = new JLabel("Type: ");
 
 		// Fields
-		bidField = new JTextField(10);
 		passwordField = new JTextField(10);
 		nameField = new JTextField(10);
 		addressField = new JTextField(10);
@@ -77,8 +73,6 @@ public class ClerkPanel {
 		JButton cancelButton = new JButton("Cancel");
 
 		// Add components to panel
-		addBorrowerForm.add(bidLabel);
-		addBorrowerForm.add(bidField);
 		addBorrowerForm.add(passwordLabel);
 		addBorrowerForm.add(passwordField);
 		addBorrowerForm.add(nameLabel);
@@ -116,19 +110,7 @@ public class ClerkPanel {
 		// Button Listeners
 		addButton.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e)
-			{
-				int bid = 0;
-				try{
-					bid = Integer.parseInt(bidField.getText());
-				}
-				catch(NumberFormatException numExcept){
-					JOptionPane.showMessageDialog(null,
-							"Invalid BID.",
-							"Error",
-							JOptionPane.ERROR_MESSAGE);
-					return;
-				};
-				
+			{	
 				String password = passwordField.getText();
 				if (password.equals("")) {
 					JOptionPane.showMessageDialog(null,
@@ -155,7 +137,6 @@ public class ClerkPanel {
 							JOptionPane.ERROR_MESSAGE);
 					return;
 				}
-
 
 				int phone = 0;
 				try{
@@ -208,9 +189,7 @@ public class ClerkPanel {
 					return;
 				}
 
-				Borrower borrower = new Borrower(bid, password, name, address, phone, email, sinOrStNo, expiryDate, type);
-				clerk = new Clerk();
-				clerk.addBorrower(borrower);
+				Clerk.addBorrower(password, name, address, phone, email, sinOrStNo, expiryDate, type);
 				frame.setVisible(false);
 			}
 		});

@@ -1,33 +1,20 @@
 package main;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import javax.swing.JOptionPane;
 
 public class Librarian {
-	private Connection con;
-
-	public Librarian(){
-		this.con = LibDB.con;
-	}
 	
-	public void addBook(Book book){
-		
-		String callNumber = book.getCallNumber();
-		int isbn = book.getIsbn();
-		String title = book.getTitle();
-		String mainAuthor = book.getMainAuthor();
-		String publisher = book.getPublisher();
-		int year = book.getYear();
+	public static void addBook(int isbn, String title, String mainAuthor, String publisher, int year){
 
 		PreparedStatement  ps;
 
 		try{
-			ps = con.prepareStatement("INSERT INTO book VALUES (?,?,?,?,?,?)");
+			ps = LibDB.con.prepareStatement("INSERT INTO book VALUES (callNumber_counter.nextval,?,?,?,?,?)");
 
-			ps.setString(1, callNumber);
+			//ps.setString(1, callNumber);
 			ps.setInt(2, isbn);
 			ps.setString(3, title);
 			ps.setString(4, mainAuthor);
@@ -36,7 +23,7 @@ public class Librarian {
 
 			ps.executeUpdate();
 			// commit work 
-			con.commit();
+			LibDB.con.commit();
 			ps.close();
 		}
 		catch (SQLException ex)
@@ -48,7 +35,7 @@ public class Librarian {
 			try 
 			{
 				// undo the insert
-				con.rollback();	
+				LibDB.con.rollback();	
 			}
 			catch (SQLException ex2)
 			{
