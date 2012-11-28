@@ -322,7 +322,7 @@ public class ClerkPanel {
 		returnForm.add(cancelButton);
 
 		// Window
-		final JFrame frame = new JFrame("Checkout");
+		final JFrame frame = new JFrame("Process Return");
 		// Window Properties
 		frame.pack();
 		frame.setVisible(true);

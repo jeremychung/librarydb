@@ -88,6 +88,7 @@ public class BorrowerPanel {
 		searchButton.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e)
 			{
+				openResultsForm();
 				String title = titleField.getText().trim();
 				String author = authorField.getText().trim();
 				String subject = subjectField.getText().trim();

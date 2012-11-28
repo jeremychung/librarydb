@@ -91,7 +91,7 @@ public class Borrower {
 					
 					ps2 = LibDB.con.prepareStatement(
 							"SELECT COUNT(*) " +
-							"FROM Book " +
+							"FROM BookCopy " +
 							"WHERE status = 'out' AND callNumber = ?");
 					ps2.setString(1, callNumber);
 					
@@ -115,7 +115,6 @@ public class Borrower {
 			// close the statement; 
 			// the ResultSet will also be closed
 			ps.close();
-			BorrowerPanel.openResultsForm();
 		}
 		catch (SQLException ex)
 		{

@@ -15,6 +15,7 @@ public class Librarian {
 
 		PreparedStatement checkPs;
 		PreparedStatement insertNewPs;
+		PreparedStatement insertNewCopyPs;
 		PreparedStatement copyPs;
 		PreparedStatement ps;
 
@@ -22,14 +23,13 @@ public class Librarian {
 		ResultSet copyRs;
 
 		try{
-			checkPs = LibDB.con.prepareStatement("SELECT callNumber FROM Book WHERE callNumber = ?");
+			checkPs = LibDB.con.prepareStatement("SELECT callNumber FROM Book WHERE Book.callNumber = ?");
 			checkPs.setString(1, callNumber);
 
 			checkRs = checkPs.executeQuery();
 
 			if ( !checkRs.next() ){
 				insertNewPs = LibDB.con.prepareStatement("INSERT INTO Book VALUES (?,?,?,?,?,?)");
-
 				insertNewPs.setString(1, callNumber);
 				insertNewPs.setInt(2, isbn);
 				insertNewPs.setString(3, title);
@@ -40,31 +40,51 @@ public class Librarian {
 				insertNewPs.executeUpdate();
 				LibDB.con.commit();
 				insertNewPs.close();
+
+				insertNewCopyPs = LibDB.con.prepareStatement("INSERT INTO BookCopy VALUES (?,?,?)");
+				insertNewCopyPs.setString(1, callNumber);
+				insertNewCopyPs.setInt(2, 1);
+				insertNewCopyPs.setString(3, "in");
+
+				insertNewCopyPs.executeUpdate();
+				LibDB.con.commit();
+				insertNewCopyPs.close();
+
+				JOptionPane.showMessageDialog(null,
+						"Book added.",
+						"Information",
+						JOptionPane.INFORMATION_MESSAGE);
+			}
+
+			else{
+				int maxCopyNo = 0;
+
+				copyPs = LibDB.con.prepareStatement("SELECT MAX(copyNo) FROM BookCopy WHERE BookCopy.callNumber = ?");
+				copyPs.setString(1, callNumber);
+
+				copyRs = copyPs.executeQuery();
+
+				if (copyRs.next()) {
+					maxCopyNo = copyRs.getInt("MAX(copyNo)");
+
+					ps = LibDB.con.prepareStatement("INSERT INTO BookCopy VALUES (?,?,?)");
+					ps.setString(1, callNumber);
+					ps.setInt(2, maxCopyNo+1);
+					ps.setString(3, "in");
+
+					ps.executeUpdate();
+					LibDB.con.commit();
+					ps.close();
+
+					JOptionPane.showMessageDialog(null,
+							"Copy added.",
+							"Information",
+							JOptionPane.INFORMATION_MESSAGE);
+				}
+				copyRs.close();
+
 			}
 			checkRs.close();
-
-			int maxCopyNo = 0;
-
-			copyPs = LibDB.con.prepareStatement("SELECT MAX(copyNo) FROM BookCopy WHERE callNumber = ?");
-			copyPs.setString(1, callNumber);
-
-			copyRs = copyPs.executeQuery();
-
-			if ( copyRs.next()) {
-				maxCopyNo = copyRs.getInt("copyNo");
-			}
-			copyRs.close();
-
-			maxCopyNo = maxCopyNo++;
-
-			ps = LibDB.con.prepareStatement("INSERT INTO BookCopy VALUES (?,?,?)");
-			ps.setString(1, callNumber);
-			ps.setInt(2, maxCopyNo);
-			ps.setString(3, "in");
-
-			ps.executeUpdate();
-			LibDB.con.commit();
-			ps.close();
 
 		} catch (SQLException ex) {
 			JOptionPane.showMessageDialog(null,
@@ -81,14 +101,14 @@ public class Librarian {
 			}
 		}
 	}
-	
+
 	public static void checkedOutItems(String subjects){
 		String[] subjs = subjects.split(";");
 		for(String subject : subjs){
 			checkedOutItem(subject.trim());
 		}
 	}
-	
+
 	//Assume: inDate means dueDate
 	//Assume: Empty Strings can be passed in as input if no subject
 
