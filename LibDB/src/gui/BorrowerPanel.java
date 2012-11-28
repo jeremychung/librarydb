@@ -7,6 +7,7 @@ import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Date;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -34,6 +35,13 @@ public class BorrowerPanel {
 	
 	public static DefaultTableModel resultsModel;
 	public static JTable resultsTable;
+	
+	public static JTable borrowedTable;
+	public static DefaultTableModel borModel;
+	
+	// pay fine fields
+	private JTextField fidField;
+	private JTextField bidField;
 
 	private JPanel mainPanel;
 	
@@ -76,7 +84,7 @@ public class BorrowerPanel {
 		frame.pack();
 		frame.setVisible(true);
 		frame.setResizable(false);
-		frame.setSize(300, 300);
+		frame.setSize(300, 200);
 		//Add content to the window.
 		frame.add(searchForm, BorderLayout.CENTER);
 		// center the frame
@@ -117,13 +125,6 @@ public class BorrowerPanel {
 		// Add table to view items
 		resultsTable = new JTable(resultsModel);
 		
-
-//		resultsModel.insertRow(resultsTable.getRowCount(),new Object[]{callNumber, numCopiesIn, numCopiesOut});
-//		model.insertRow(resultsTable.getRowCount(),new Object[]{"Call2", "2", "Book2", "date2", "date22", new Boolean(false)});
-//		model.insertRow(resultsTable.getRowCount(),new Object[]{"Call3", "3", "Book3", "date3", "date33", new Boolean(false)});
-//		model.insertRow(resultsTable.getRowCount(),new Object[]{"Call4", "4", "Book4", "date4", "date44", new Boolean(false)});
-		
-		
 		// Add table to view items
 		JScrollPane scrollPane = new JScrollPane(resultsTable);
 		
@@ -150,6 +151,86 @@ public class BorrowerPanel {
 
 		// Button Listeners
 		closeButton.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e)
+			{
+				frame.setVisible(false);
+			}
+		});
+	}
+	
+	private void openPayForm(){
+		// Add borrower Form
+		JPanel payForm = new JPanel();
+		// Set form layout
+		payForm.setLayout(new GridLayout(0, 2, 10, 10));
+		payForm.setBorder(new EmptyBorder(10, 10, 10, 10) );
+
+		// Field Labels
+		JLabel fidLabel = new JLabel("Fid: ");
+		JLabel bidLabel = new JLabel("Bid: ");
+		// Fields
+		fidField = new JTextField(10);
+		bidField = new JTextField(10);
+		
+		// Buttons
+		JButton payButton = new JButton("Pay");
+		JButton cancelButton = new JButton("Cancel");
+
+		// Add components to panel
+		payForm.add(fidLabel);
+		payForm.add(fidField);
+		payForm.add(bidLabel);
+		payForm.add(bidField);
+		payForm.add(payButton);
+		payForm.add(cancelButton);
+
+		// Window
+		final JFrame frame = new JFrame("Pay Fines");
+		// Window Properties
+		frame.pack();
+		frame.setVisible(true);
+		frame.setResizable(false);
+		frame.setSize(300, 150);
+		//Add content to the window.
+		frame.add(payForm, BorderLayout.CENTER);
+		// center the frame
+		Dimension d = frame.getToolkit().getScreenSize();
+		Rectangle r = frame.getBounds();
+		frame.setLocation( (d.width - r.width)/2, (d.height - r.height)/2 );
+
+		// Button Listeners
+		payButton.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e)
+			{
+				int fid = 0;
+				try{
+					fid = Integer.parseInt(fidField.getText());
+				}
+				catch(NumberFormatException numExcept){
+					JOptionPane.showMessageDialog(null,
+							"Invalid fid.",
+							"Error",
+							JOptionPane.ERROR_MESSAGE);
+					return;
+				};
+				
+				int bid = 0;
+				try{
+					bid = Integer.parseInt(bidField.getText());
+				}
+				catch(NumberFormatException numExcept){
+					JOptionPane.showMessageDialog(null,
+							"Invalid bid.",
+							"Error",
+							JOptionPane.ERROR_MESSAGE);
+					return;
+				};
+				
+				Borrower.payFine(bid, fid);
+			}
+		});
+
+		cancelButton.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e)
 			{
 				frame.setVisible(false);
@@ -195,6 +276,7 @@ public class BorrowerPanel {
 			public void actionPerformed(ActionEvent e)
 			{				
 				openBorrowedForm();
+				//checkBorrowerOutItems(bid);
 			}
 		});
 		
@@ -229,9 +311,12 @@ public class BorrowerPanel {
 
 		// Field Labels
 		JLabel callNumberLabel = new JLabel("Call Number: ");
-		// Fields
-		JTextField callNumberField = new JTextField(10);
+		JLabel bidLabel = new JLabel("Bid: ");
 		
+		// Fields
+		final JTextField callNumberField = new JTextField(10);
+		bidField = new JTextField(10);
+
 		// Buttons
 		JButton holdButton = new JButton("Place Hold");
 		JButton cancelButton = new JButton("Cancel");
@@ -239,6 +324,8 @@ public class BorrowerPanel {
 		// Add components to panel
 		holdForm.add(callNumberLabel);
 		holdForm.add(callNumberField);
+		holdForm.add(bidLabel);
+		holdForm.add(bidField);
 		holdForm.add(holdButton);
 		holdForm.add(cancelButton);
 
@@ -248,7 +335,7 @@ public class BorrowerPanel {
 		frame.pack();
 		frame.setVisible(true);
 		frame.setResizable(false);
-		frame.setSize(300, 125);
+		frame.setSize(300, 150);
 		//Add content to the window.
 		frame.add(holdForm, BorderLayout.CENTER);
 		// center the frame
@@ -260,7 +347,28 @@ public class BorrowerPanel {
 		holdButton.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e)
 			{
-			
+				int bid = 0;
+				try{
+					bid = Integer.parseInt(bidField.getText());
+				}
+				catch(NumberFormatException numExcept){
+					JOptionPane.showMessageDialog(null,
+							"Invalid bid.",
+							"Error",
+							JOptionPane.ERROR_MESSAGE);
+					return;
+				};
+
+				String callNumber = callNumberField.getText();
+				if (callNumber.equals("")) {
+					JOptionPane.showMessageDialog(null,
+							"Please fill in a call number.",
+							"Error",
+							JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+				
+				Borrower.placeHoldRequest(bid, callNumber);
 			}
 		});
 
@@ -276,24 +384,12 @@ public class BorrowerPanel {
 		// Add check overdue Form
 		JPanel borrowedForm = new JPanel();
 		
-		final String[] columnNames = {"Call Number", "Copy #", "Title", "Out Date", "Due Date", "Out"};
+		final String[] columnNames = {"Call Number", "Copy #", "Out Date"};
 		Object[][] data = {};
 
-		final DefaultTableModel model = new DefaultTableModel(data,columnNames);
-
-	
+		borModel = new DefaultTableModel(data,columnNames);
 		// Add table to view items
-		JTable borrowedTable = new JTable(model);
-		
-		TableColumn tc = borrowedTable.getColumnModel().getColumn(5);  
-        tc.setCellEditor(borrowedTable.getDefaultEditor(Boolean.class));  
-        tc.setCellRenderer(borrowedTable.getDefaultRenderer(Boolean.class));
-
-		model.insertRow(borrowedTable.getRowCount(),new Object[]{"Call1", "1", "Book1", "date1", "date11", new Boolean(false)});
-		model.insertRow(borrowedTable.getRowCount(),new Object[]{"Call2", "2", "Book2", "date2", "date22", new Boolean(false)});
-		model.insertRow(borrowedTable.getRowCount(),new Object[]{"Call3", "3", "Book3", "date3", "date33", new Boolean(false)});
-		model.insertRow(borrowedTable.getRowCount(),new Object[]{"Call4", "4", "Book4", "date4", "date44", new Boolean(false)});
-		
+		borrowedTable = new JTable(borModel);
 		
 		// Add table to view items
 		JScrollPane scrollPane = new JScrollPane(borrowedTable);
@@ -477,6 +573,7 @@ public class BorrowerPanel {
 		payFineButton.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e)
 			{
+				openPayForm();
 			}
 		});
 		

@@ -31,10 +31,10 @@ public class LibrarianPanel {
 	private JTextField publisherField;
 	private JTextField yearField;
 	private JPanel mainPanel;
-	
+
 	public static JTable viewPopTable;
 	public static DefaultTableModel popModel;
-	
+
 	public static JTable viewOutTable;
 	public static DefaultTableModel outModel;
 
@@ -109,7 +109,7 @@ public class LibrarianPanel {
 							JOptionPane.ERROR_MESSAGE);
 					return;
 				}
-				
+
 				int isbn = 0;
 				try{
 					isbn = Integer.parseInt(isbnField.getText());
@@ -172,35 +172,35 @@ public class LibrarianPanel {
 			}
 		});
 	}
-	
+
 	private void openViewOutForm(){
 		// Add check overdue Form
 		JPanel viewOutForm = new JPanel();
-		
+
 		final String[] columnNames = {"Call Number", "Copy #", "Out Date", "Due Date", "Out"};
 		Object[][] data = {};
 
 		outModel = new DefaultTableModel(data,columnNames);
-	
+
 		// Add table to view items
 		viewOutTable = new JTable(outModel);
 		
-		TableColumn tc = viewOutTable.getColumnModel().getColumn(5);  
+		TableColumn tc = viewOutTable.getColumnModel().getColumn(4);  
         tc.setCellEditor(viewOutTable.getDefaultEditor(Boolean.class));  
         tc.setCellRenderer(viewOutTable.getDefaultRenderer(Boolean.class));
 
 		// Add table to view items
 		JScrollPane scrollPane = new JScrollPane(viewOutTable);
-		
+
 		JLabel subjectsLabel = new JLabel("Subjects: ");
 		final JTextField subjectsField = new JTextField(25);
 		JButton searchButton = new JButton("Search");
 		JPanel subjectsPanel = new JPanel();
-		
+
 		subjectsPanel.add(subjectsLabel, BorderLayout.LINE_START);
 		subjectsPanel.add(subjectsField, BorderLayout.CENTER);
 		subjectsPanel.add(searchButton, BorderLayout.LINE_END);
-		
+
 		// Buttons
 		JButton sendSeleButton = new JButton("Send to selected");
 		JButton sendAllButton = new JButton("Send to All");
@@ -210,7 +210,7 @@ public class LibrarianPanel {
 		buttonPanel.add(sendSeleButton, BorderLayout.LINE_START);
 		buttonPanel.add(sendAllButton, BorderLayout.CENTER);
 		buttonPanel.add(closeButton, BorderLayout.LINE_END);
-		
+
 
 		// Add components to panel
 		scrollPane.setPreferredSize(new Dimension(480, 200));
@@ -237,7 +237,7 @@ public class LibrarianPanel {
 			public void actionPerformed(ActionEvent e)
 			{			
 				String subjects = subjectsField.getText();
-				Librarian.checkedOutItems(subjects);
+					Librarian.checkedOutItems(subjects);
 			}
 		});
 
@@ -248,7 +248,7 @@ public class LibrarianPanel {
 			}
 		});
 	}
-	
+
 	private void openViewPopForm(){
 		// Add check overdue Form
 		JPanel viewPopForm = new JPanel();
@@ -260,21 +260,21 @@ public class LibrarianPanel {
 
 		// Add table to view items
 		viewPopTable = new JTable(popModel);
-		
+
 		// Add table to view items
 		JScrollPane scrollPane = new JScrollPane(viewPopTable);
-		
+
 		JLabel topLabel = new JLabel("Top: ");
 		final JTextField topField = new JTextField(10);
 		JLabel yearLabel = new JLabel("of year: ");
 		final JTextField yearField = new JTextField(10);
 		JPanel topPanel = new JPanel();
-		
+
 		topPanel.add(topLabel);
 		topPanel.add(topField);
 		topPanel.add(yearLabel);
 		topPanel.add(yearField);
-		
+
 		// Buttons
 		JButton showButton = new JButton("Show");
 		JButton closeButton = new JButton("Close");
@@ -282,7 +282,7 @@ public class LibrarianPanel {
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.add(showButton, BorderLayout.LINE_START);
 		buttonPanel.add(closeButton, BorderLayout.LINE_END);
-		
+
 
 		// Add components to panel
 		scrollPane.setPreferredSize(new Dimension(480, 200));
@@ -319,7 +319,7 @@ public class LibrarianPanel {
 							JOptionPane.ERROR_MESSAGE);
 					return;
 				};
-				
+
 				int year = 0;
 				try{
 					year = Integer.parseInt(yearField.getText());
@@ -331,7 +331,7 @@ public class LibrarianPanel {
 							JOptionPane.ERROR_MESSAGE);
 					return;
 				};
-				
+
 				Librarian.popularItems(top, year);
 			}
 		});
@@ -343,7 +343,7 @@ public class LibrarianPanel {
 			}
 		});
 	}
-	
+
 	public JComponent getLibrarianPanel(){
 
 		mainPanel = new JPanel();

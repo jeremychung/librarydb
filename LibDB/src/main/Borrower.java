@@ -13,7 +13,6 @@ import javax.swing.JOptionPane;
 
 public class Borrower {
 	private int bid;
-	private String password;
 
 	public static void searchBooks(String title, String author, String subject){
 
@@ -125,12 +124,7 @@ public class Borrower {
 		}
 	}
 
-	public void checkAccount(int bid, String password) {
-		
-		if (!authenticate(bid, password)) {
-			return;
-		}
-		
+	public void checkAccount(int bid) {
 		checkBorrowerOutItems(bid);
 		checkBorrowerFines(bid);
 	}
@@ -156,6 +150,8 @@ public class Borrower {
 				callNumber = rs.getString("callNumber");
 				copyNumber = rs.getInt("copyNo");
 				outDate = rs.getDate("outDate");
+				
+				 BorrowerPanel.borModel.insertRow(BorrowerPanel.borrowedTable.getRowCount(),new Object[]{callNumber, copyNumber, outDate});
 			}
 			ps.close();
 		} catch (SQLException ex) {
@@ -251,11 +247,7 @@ public class Borrower {
 	}
 	
 	
-	public void placeHoldRequest(int bid, String password, String callNumber){
-		
-		if (!authenticate(bid, password)) {
-			return;
-		}
+	public static void placeHoldRequest(int bid, String callNumber){
 		
 		PreparedStatement  ps;
 		ResultSet  rs;
@@ -348,11 +340,8 @@ public class Borrower {
 		}
 	}
 	
-	public void payFine(int bid, String password, int fid) {
-		
-		if (!authenticate(bid, password)) {
-			return;
-		}
+public static void payFine(int bid, int fid) {
+
 		
 		PreparedStatement  ps;
 		ResultSet  rs;
@@ -404,6 +393,12 @@ public class Borrower {
 			// commit work 
 			LibDB.con.commit();
 			ps.close();
+			
+			JOptionPane.showMessageDialog(null,
+					"Fine payed.",
+					"Information",
+					JOptionPane.INFORMATION_MESSAGE);
+			
 		} catch (SQLException ex) {
 			JOptionPane.showMessageDialog(null,
 					"Message: " + ex.getMessage(),
@@ -418,44 +413,6 @@ public class Borrower {
 						"Error",
 						JOptionPane.ERROR_MESSAGE);
 			}
-		}
-	}
-
-	public boolean authenticate(int bid, String password){
-
-		String pass = null;
-		PreparedStatement  ps;
-		ResultSet  rs;
-
-		try
-		{
-			ps = LibDB.con.prepareStatement("SELECT password FROM borrower WHERE bid=" + bid);
-
-			rs = ps.executeQuery();
-
-			if(rs.next()){
-				pass = rs.getString("password");
-			}
-			// close the statement; 
-			// the ResultSet will also be closed
-			ps.close();
-		}
-		catch (SQLException ex)
-		{
-			JOptionPane.showMessageDialog(null,
-					"Message: " + ex.getMessage(),
-					"Error",
-					JOptionPane.ERROR_MESSAGE);
-		}
-
-		if(pass.equals(password)){
-			return true;
-		} else {
-			JOptionPane.showMessageDialog(null,
-					"Incorrect Password!",
-					"Error",
-					JOptionPane.ERROR_MESSAGE);
-			return false;
 		}
 	}
 

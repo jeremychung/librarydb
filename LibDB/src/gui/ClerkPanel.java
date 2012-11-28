@@ -50,6 +50,9 @@ public class ClerkPanel {
 	// Return form fields;
 	private JTextField copyNoField;
 	
+	public static DefaultTableModel overModel;
+	public static JTable overdueTable;
+	
 	private JPanel mainPanel;
 
 	public ClerkPanel(){
@@ -376,23 +379,19 @@ public class ClerkPanel {
 		// Add check overdue Form
 		JPanel overdueForm = new JPanel();
 		
-		final String[] columnNames = {"Call Number", "Copy #", "Title", "Bid", "Name", "Select"};
+		final String[] columnNames = {"Call Number", "Copy #", "Bid", "Name", "Email Address", "Out Date", "Due Date", "Select"};
+
 		Object[][] data = {};
 
-		final DefaultTableModel model = new DefaultTableModel(data,columnNames);
-
+		overModel = new DefaultTableModel(data,columnNames);
+		
 	
 		// Add table to view items
-		JTable overdueTable = new JTable(model);
+		overdueTable = new JTable(overModel);
 		
-		TableColumn tc = overdueTable.getColumnModel().getColumn(5);  
+		TableColumn tc = overdueTable.getColumnModel().getColumn(7);  
         tc.setCellEditor(overdueTable.getDefaultEditor(Boolean.class));  
         tc.setCellRenderer(overdueTable.getDefaultRenderer(Boolean.class));
-
-		model.insertRow(overdueTable.getRowCount(),new Object[]{"Call1", "1", "Book1", "11", "Mark", new Boolean(false)});
-		model.insertRow(overdueTable.getRowCount(),new Object[]{"Call2", "2", "Book2", "22", "John", new Boolean(false)});
-		model.insertRow(overdueTable.getRowCount(),new Object[]{"Call3", "3", "Book3", "33", "Sam", new Boolean(false)});
-		model.insertRow(overdueTable.getRowCount(),new Object[]{"Call4", "4", "Book4", "44", "Bill", new Boolean(false)});
 		
 		
 		// Add table to view items
@@ -432,13 +431,13 @@ public class ClerkPanel {
 			public void actionPerformed(ActionEvent e)
 			{			
 				ArrayList<String> bids = new ArrayList<String>();
-				for(int x=0; x<model.getRowCount(); x++){
-					if(model.getValueAt(x, 5).equals(true)){
-						bids.add((String) model.getValueAt(x, 3));
+				for(int x=0; x<overModel.getRowCount(); x++){
+					if(overModel.getValueAt(x, 5).equals(true)){
+						bids.add((String) overModel.getValueAt(x, 3));
 					}
 				}
 				for(String bid : bids){
-					System.out.println(bid);
+					//System.out.println(bid);
 				}
 			}
 		});
@@ -447,11 +446,11 @@ public class ClerkPanel {
 			public void actionPerformed(ActionEvent e)
 			{			
 				ArrayList<String> bids = new ArrayList<String>();
-				for(int x=0; x<model.getRowCount(); x++){
-						bids.add((String) model.getValueAt(x, 3));
+				for(int x=0; x<overModel.getRowCount(); x++){
+						bids.add((String) overModel.getValueAt(x, 3));
 				}
 				for(String bid : bids){
-					System.out.println(bid);
+					//System.out.println(bid);
 				}
 			}
 		});
@@ -504,6 +503,7 @@ public class ClerkPanel {
 			{
 				//Execute when button is pressed
 				openOverdueForm();
+				Clerk.checkOverdue();
 			}
 		});  
 

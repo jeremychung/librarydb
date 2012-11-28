@@ -16,6 +16,7 @@ public class Librarian {
 		PreparedStatement checkPs;
 		PreparedStatement insertNewPs;
 		PreparedStatement insertNewCopyPs;
+		PreparedStatement addAuthPs;
 		PreparedStatement copyPs;
 		PreparedStatement ps;
 
@@ -49,6 +50,14 @@ public class Librarian {
 				insertNewCopyPs.executeUpdate();
 				LibDB.con.commit();
 				insertNewCopyPs.close();
+
+				addAuthPs = LibDB.con.prepareStatement("INSERT INTO hasAuthor VALUES (?,?)");
+				addAuthPs.setString(1, callNumber);
+				addAuthPs.setString(2, mainAuthor);
+
+				addAuthPs.executeUpdate();
+				LibDB.con.commit();
+				addAuthPs.close();
 
 				JOptionPane.showMessageDialog(null,
 						"Book added.",
@@ -168,8 +177,8 @@ public class Librarian {
 		}
 	}
 
-	public static void popularItems(int year, int n){
-		int callNumber;
+	public static void popularItems(int n, int year){
+		String callNumber;
 		int    isbn;
 		String title;
 		String mainAuthor;
@@ -177,36 +186,26 @@ public class Librarian {
 		int    bookyear;
 
 		PreparedStatement ps;
+		PreparedStatement searchPs;
 		ResultSet rs;
+		ResultSet searchRs;
 
 		try{
-			ps = LibDB.con.prepareStatement("SELECT * " +
-					"FROM Book " +
-					"WHERE callNumber IN (SELECT TOP ? callNumber, COUNT(*) " +
+			ps = LibDB.con.prepareStatement("SELECT callNumber, COUNT(*) as count " +
 					"FROM Borrowing " +
-					"WHERE YEAR = ? " +
+					"WHERE TO_CHAR(outDate, 'YYYY') = ? " +
 					"GROUP BY callNumber " +
-					"ORDER BY COUNT(*) DESC)");
+					"ORDER BY count DESC ");
 
-			ps.setInt(1, n);
-			ps.setInt(2, year);
+			ps.setInt(1, year);
 
 			rs = ps.executeQuery();
 
-			while(rs.next()) {
-				callNumber = rs.getInt("callNumber");
+			while(n>0 && rs.next()) {
+				callNumber = rs.getString("callNumber");
 
-				isbn = rs.getInt("isbn");
-
-				title = rs.getString("title");
-
-				mainAuthor = rs.getString("mainAuthor");
-
-				publisher = rs.getString("publisher");
-
-				bookyear = rs.getInt("year");
-
-				LibrarianPanel.popModel.insertRow(LibrarianPanel.viewPopTable.getRowCount(),new Object[]{callNumber, isbn, title, mainAuthor, publisher, bookyear});
+				LibrarianPanel.popModel.insertRow(LibrarianPanel.viewPopTable.getRowCount(),new Object[]{callNumber});
+				n--;
 			}
 
 			rs.close();
