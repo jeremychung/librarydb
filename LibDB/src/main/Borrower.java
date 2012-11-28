@@ -1,5 +1,7 @@
 package main;
 
+import gui.BorrowerPanel;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -13,7 +15,7 @@ public class Borrower {
 	private int bid;
 	private String password;
 
-	public void searchBooks(String title, String author, String subject){
+	public static void searchBooks(String title, String author, String subject){
 
 		PreparedStatement  ps;
 		ResultSet  rs;
@@ -105,10 +107,15 @@ public class Borrower {
 							"Error",
 							JOptionPane.ERROR_MESSAGE);
 				}
+				
+				// Add callnumber with numCopiesIn and numCopiesOut into results table
+				BorrowerPanel.resultsModel.insertRow(BorrowerPanel.resultsTable.getRowCount(),new Object[]{callNumber, numCopiesIn, numCopiesOut});
+				
 			}
 			// close the statement; 
 			// the ResultSet will also be closed
 			ps.close();
+			BorrowerPanel.openResultsForm();
 		}
 		catch (SQLException ex)
 		{

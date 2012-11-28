@@ -11,7 +11,7 @@ import javax.swing.JOptionPane;
 
 public class Librarian {
 
-	public static void addNewBook(int callNumber, int isbn, String title, String mainAuthor, String publisher, int year){
+	public static void addNewBook(String callNumber, int isbn, String title, String mainAuthor, String publisher, int year){
 
 		PreparedStatement checkPs;
 		PreparedStatement insertNewPs;
@@ -22,15 +22,15 @@ public class Librarian {
 		ResultSet copyRs;
 
 		try{
-			checkPs = LibDB.con.prepareStatement("SELECT callNumber FROM Book WHERE Book.callNumber = ?");
-			checkPs.setInt(1, callNumber);
+			checkPs = LibDB.con.prepareStatement("SELECT callNumber FROM Book WHERE callNumber = ?");
+			checkPs.setString(1, callNumber);
 
 			checkRs = checkPs.executeQuery();
 
 			if ( !checkRs.next() ){
 				insertNewPs = LibDB.con.prepareStatement("INSERT INTO Book VALUES (?,?,?,?,?,?)");
 
-				insertNewPs.setInt(1, callNumber);
+				insertNewPs.setString(1, callNumber);
 				insertNewPs.setInt(2, isbn);
 				insertNewPs.setString(3, title);
 				insertNewPs.setString(4, mainAuthor);
@@ -45,8 +45,8 @@ public class Librarian {
 
 			int maxCopyNo = 0;
 
-			copyPs = LibDB.con.prepareStatement("SELECT MAX(copyNo) FROM BookCopy WHERE BookCopy.callNumber = ?");
-			copyPs.setInt(1, callNumber);
+			copyPs = LibDB.con.prepareStatement("SELECT MAX(copyNo) FROM BookCopy WHERE callNumber = ?");
+			copyPs.setString(1, callNumber);
 
 			copyRs = copyPs.executeQuery();
 
@@ -58,7 +58,7 @@ public class Librarian {
 			maxCopyNo = maxCopyNo++;
 
 			ps = LibDB.con.prepareStatement("INSERT INTO BookCopy VALUES (?,?,?)");
-			ps.setInt(1, callNumber);
+			ps.setString(1, callNumber);
 			ps.setInt(2, maxCopyNo);
 			ps.setString(3, "in");
 

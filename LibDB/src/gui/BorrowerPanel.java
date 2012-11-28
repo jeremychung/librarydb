@@ -21,12 +21,20 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 
+import main.Borrower;
 import main.Clerk;
 
 
 public class BorrowerPanel {
 	
-	private JTextField searchField;
+	// Search fields
+	private JTextField titleField;
+	private JTextField authorField;
+	private JTextField subjectField;
+	
+	public static DefaultTableModel resultsModel;
+	public static JTable resultsTable;
+
 	private JPanel mainPanel;
 	
 	public BorrowerPanel(){
@@ -40,17 +48,25 @@ public class BorrowerPanel {
 		searchForm.setBorder(new EmptyBorder(10, 10, 10, 10) );
 
 		// Field Labels
-		JLabel searchLabel = new JLabel("Search: ");
+		JLabel titleLabel = new JLabel("Title: ");
+		JLabel authorLabel = new JLabel("Author: ");
+		JLabel subjectLabel = new JLabel("Subject: ");
 		// Fields
-		searchField = new JTextField(10);
+		titleField = new JTextField(10);
+		authorField = new JTextField(10);
+		subjectField = new JTextField(10);
 		
 		// Buttons
 		JButton searchButton = new JButton("Search");
 		JButton cancelButton = new JButton("Cancel");
 
 		// Add components to panel
-		searchForm.add(searchLabel);
-		searchForm.add(searchField);
+		searchForm.add(titleLabel);
+		searchForm.add(titleField);
+		searchForm.add(authorLabel);
+		searchForm.add(authorField);
+		searchForm.add(subjectLabel);
+		searchForm.add(subjectField);
 		searchForm.add(searchButton);
 		searchForm.add(cancelButton);
 
@@ -60,7 +76,7 @@ public class BorrowerPanel {
 		frame.pack();
 		frame.setVisible(true);
 		frame.setResizable(false);
-		frame.setSize(300, 125);
+		frame.setSize(300, 300);
 		//Add content to the window.
 		frame.add(searchForm, BorderLayout.CENTER);
 		// center the frame
@@ -72,7 +88,10 @@ public class BorrowerPanel {
 		searchButton.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e)
 			{
-				openResultsForm();
+				String title = titleField.getText().trim();
+				String author = authorField.getText().trim();
+				String subject = subjectField.getText().trim();
+				Borrower.searchBooks(title, author, subject);
 			}
 		});
 
@@ -84,27 +103,24 @@ public class BorrowerPanel {
 		});
 	}
 	
-	private void openResultsForm(){
+	public static void openResultsForm(){
 		// Add check overdue Form
 		JPanel resultsForm = new JPanel();
 		
-		final String[] columnNames = {"Call Number", "Copy #", "Title", "Out Date", "Due Date", "Out"};
+		final String[] columnNames = {"Call Number", "Copies In", "Copies Out"};
 		Object[][] data = {};
 
-		final DefaultTableModel model = new DefaultTableModel(data,columnNames);
+		resultsModel = new DefaultTableModel(data,columnNames);
 
 	
 		// Add table to view items
-		JTable resultsTable = new JTable(model);
+		resultsTable = new JTable(resultsModel);
 		
-		TableColumn tc = resultsTable.getColumnModel().getColumn(5);  
-        tc.setCellEditor(resultsTable.getDefaultEditor(Boolean.class));  
-        tc.setCellRenderer(resultsTable.getDefaultRenderer(Boolean.class));
 
-		model.insertRow(resultsTable.getRowCount(),new Object[]{"Call1", "1", "Book1", "date1", "date11", new Boolean(false)});
-		model.insertRow(resultsTable.getRowCount(),new Object[]{"Call2", "2", "Book2", "date2", "date22", new Boolean(false)});
-		model.insertRow(resultsTable.getRowCount(),new Object[]{"Call3", "3", "Book3", "date3", "date33", new Boolean(false)});
-		model.insertRow(resultsTable.getRowCount(),new Object[]{"Call4", "4", "Book4", "date4", "date44", new Boolean(false)});
+//		resultsModel.insertRow(resultsTable.getRowCount(),new Object[]{callNumber, numCopiesIn, numCopiesOut});
+//		model.insertRow(resultsTable.getRowCount(),new Object[]{"Call2", "2", "Book2", "date2", "date22", new Boolean(false)});
+//		model.insertRow(resultsTable.getRowCount(),new Object[]{"Call3", "3", "Book3", "date3", "date33", new Boolean(false)});
+//		model.insertRow(resultsTable.getRowCount(),new Object[]{"Call4", "4", "Book4", "date4", "date44", new Boolean(false)});
 		
 		
 		// Add table to view items

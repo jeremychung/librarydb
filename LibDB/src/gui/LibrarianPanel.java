@@ -101,17 +101,14 @@ public class LibrarianPanel {
 		addButton.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e)
 			{
-				int callNumber = 0;
-				try{
-					callNumber = Integer.parseInt(callNumberField.getText());
-				}
-				catch(NumberFormatException numExcept){
+				String callNumber = callNumberField.getText();
+				if (callNumber.equals("")) {
 					JOptionPane.showMessageDialog(null,
-							"Invalid Call Number.",
+							"Please fill in the call number.",
 							"Error",
 							JOptionPane.ERROR_MESSAGE);
 					return;
-				};
+				}
 				
 				int isbn = 0;
 				try{
